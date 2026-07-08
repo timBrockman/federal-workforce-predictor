@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for the customer-spend-microservice template.
+"""Pytest configuration and fixtures for the customer-spend-api template.
 
 Provides reusable authenticated clients and principal overrides.
 """

@@ -96,7 +96,7 @@ Available at `/graphql`. Paste token in the "Authorization" header section if ne
 
 ## Error Extensions
 
-customer-spend-microservice uses `extensions.code` for machine-readable error types (e.g. `UNAUTHENTICATED`).
+customer-spend-api uses `extensions.code` for machine-readable error types (e.g. `UNAUTHENTICATED`).
 
 Clients should check `errors[].extensions.code` rather than string matching messages.
 

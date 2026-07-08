@@ -52,7 +52,7 @@ def _principal_from_args(arguments: dict[str, Any]) -> Principal:
     )
 
 
-server = Server("customer-spend-microservice-mcp")
+server = Server("customer-spend-api-mcp")
 
 
 @server.list_tools()

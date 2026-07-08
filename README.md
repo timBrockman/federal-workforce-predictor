@@ -1,4 +1,4 @@
-# customer-spend-microservice
+# customer-spend-api
 
 **Reference implementation** of an ethics-first customer spend intelligence microservice / template.
 

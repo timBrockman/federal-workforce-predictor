@@ -1,6 +1,6 @@
 # MCP Integration
 
-customer-spend-microservice includes a lightweight MCP server (using the official `mcp` Python SDK) that exposes a **curated, safe subset** of the same capabilities available through GraphQL.
+customer-spend-api includes a lightweight MCP server (using the official `mcp` Python SDK) that exposes a **curated, safe subset** of the same capabilities available through GraphQL.
 
 ## Why MCP?
 

@@ -1,6 +1,6 @@
 # The Principal Model
 
-One of the most useful patterns in customer-spend-microservice is the `Principal` that carries identity **and** consent information through every layer — GraphQL resolvers, services, recommender, agent, **and** MCP tools.
+One of the most useful patterns in customer-spend-api is the `Principal` that carries identity **and** consent information through every layer — GraphQL resolvers, services, recommender, agent, **and** MCP tools.
 
 ## Definition
 
@@ -43,7 +43,7 @@ Many AI service templates either:
 - Hardcode a user, or
 - Only support auth at the HTTP boundary.
 
-By making `Principal` a first-class, serializable concept that reaches the MCP layer, customer-spend-microservice demonstrates how to keep authorization + consent consistent across multiple interfaces.
+By making `Principal` a first-class, serializable concept that reaches the MCP layer, customer-spend-api demonstrates how to keep authorization + consent consistent across multiple interfaces.
 
 See:
 - `app/core/security.py`

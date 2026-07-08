@@ -1,4 +1,4 @@
-# customer-spend-microservice: Implementation Plan & Re-assessment
+# customer-spend-api: Implementation Plan & Re-assessment
 
 **Date**: 2026-07-08  
 **Status**: Core implementation + tests + verification largely complete and passing. Documentation + a few wiring gaps remain.  

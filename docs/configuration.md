@@ -1,6 +1,6 @@
 # Configuration Reference
 
-customer-spend-microservice uses `pydantic-settings` (12-factor style). All settings can be provided via environment variables or a `.env` file (case-insensitive).
+customer-spend-api uses `pydantic-settings` (12-factor style). All settings can be provided via environment variables or a `.env` file (case-insensitive).
 
 Copy `.env.example` and adjust.
 
@@ -8,7 +8,7 @@ Copy `.env.example` and adjust.
 
 | Variable          | Default          | Description                                      | Production Notes |
 |-------------------|------------------|--------------------------------------------------|------------------|
-| `APP_NAME`        | `customer-spend-microservice`       | Service name used in health responses and logs   | - |
+| `APP_NAME`        | `customer-spend-api`       | Service name used in health responses and logs   | - |
 | `DEBUG`           | `false`          | Enables `/demo-token` endpoint and debug logging | **Never** true in prod |
 | `LOG_LEVEL`       | `INFO`           | Logging level                                    | Use `INFO` or `WARNING` in prod |
 
@@ -38,7 +38,7 @@ Hybrid model: excellent offline experience + real IdP support.
 | `USE_LOCAL_TEST_KEYS`   | `true` | Use generated RSA keys (never hits network). Set `false` for real JWKS. |
 | `AUTH_JWKS_URL`         | (none) | Real JWKS endpoint when not using local keys |
 | `AUTH_ISSUER`           | `https://example.auth0.com/` | Expected `iss` claim |
-| `AUTH_AUDIENCE`         | `https://api.customer-spend-microservice.example.com` | Expected `aud` claim |
+| `AUTH_AUDIENCE`         | `https://api.customer-spend-api.example.com` | Expected `aud` claim |
 | `AUTH0_CLIENT_ID`       | (none) | For `/demo-token?client_id=...` real exchange |
 | `AUTH0_CLIENT_SECRET`   | (none) | |
 | `AUTH0_TOKEN_URL`       | (none) | e.g. `https://your-tenant.auth0.com/oauth/token` |
@@ -120,7 +120,7 @@ DEBUG=false
 USE_LOCAL_TEST_KEYS=false
 AUTH_JWKS_URL=https://your-tenant.auth0.com/.well-known/jwks.json
 AUTH_ISSUER=https://your-tenant.auth0.com/
-AUTH_AUDIENCE=https://api.customer-spend-microservice.example.com
+AUTH_AUDIENCE=https://api.customer-spend-api.example.com
 AUTH0_CLIENT_ID=...
 AUTH0_CLIENT_SECRET=...
 AUTH0_TOKEN_URL=https://your-tenant.auth0.com/oauth/token

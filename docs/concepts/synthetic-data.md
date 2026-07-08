@@ -2,7 +2,7 @@
 
 ## Decision
 
-All "social" signals in customer-spend-microservice are **synthetic and versioned**. There is no support for ingesting real social media data.
+All "social" signals in customer-spend-api are **synthetic and versioned**. There is no support for ingesting real social media data.
 
 See `app/services/recommender.py`:
 ```python

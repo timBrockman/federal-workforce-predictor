@@ -1,6 +1,6 @@
 # Use Cases & Why This Template Exists
 
-customer-spend-microservice is deliberately built as a **reference and teaching template**. Here are realistic scenarios where the patterns it demonstrates are valuable.
+customer-spend-api is deliberately built as a **reference and teaching template**. Here are realistic scenarios where the patterns it demonstrates are valuable.
 
 ## 1. Internal Company Spend Coach
 
@@ -55,4 +55,4 @@ You want a small but realistic codebase to teach:
 
 Pick the scenario closest to your need, then follow the corresponding "Extending" recipe or "Production" guide.
 
-The goal is not that you ship customer-spend-microservice as-is, but that you can confidently lift the patterns (especially the ethics + principal + transparency ones) into your real services.
+The goal is not that you ship customer-spend-api as-is, but that you can confidently lift the patterns (especially the ethics + principal + transparency ones) into your real services.

@@ -1,6 +1,6 @@
 # Productionizing Checklist
 
-This document collects practical steps to take customer-spend-microservice from template to production service.
+This document collects practical steps to take customer-spend-api from template to production service.
 
 ## 1. Database
 

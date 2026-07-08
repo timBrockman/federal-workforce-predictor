@@ -1,6 +1,6 @@
 # Architecture Overview
 
-customer-spend-microservice is deliberately layered so that ethics, consent, and identity are impossible to bypass.
+customer-spend-api is deliberately layered so that ethics, consent, and identity are impossible to bypass.
 
 ## High-Level Flow (User asks for budget recommendations)
 

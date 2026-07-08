@@ -15,7 +15,7 @@ uv --version
 
 ```bash
 git clone <your-fork-or-clone>
-cd customer-spend-microservice
+cd customer-spend-api
 uv sync --extra dev
 ```
 

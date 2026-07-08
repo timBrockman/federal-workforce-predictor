@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-One-shot verification script for the customer-spend-microservice template.
+One-shot verification script for the customer-spend-api template.
 
 Runs the key production paths:
 - DB init + repositories
@@ -133,7 +133,7 @@ async def verify_mcp():
 
 
 async def main():
-    print("customer-spend-microservice verification\n" + "=" * 40)
+    print("customer-spend-api verification\n" + "=" * 40)
     await verify_db()
     verify_auth_and_recommender()
     verify_graphql()

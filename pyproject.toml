@@ -1,13 +1,13 @@
 [project]
-name = "customer-spend-microservice"
+name = "customer-spend-api"
 version = "0.1.0"
 description = "Reference implementation of an ethics-first customer spend intelligence microservice. FastAPI + Strawberry GraphQL (limited), MCP, Alembic, consent-aware auth, and guardrailed AI patterns."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-  { name = "The customer-spend-microservice contributors" }
+  { name = "The customer-spend-api contributors" }
 ]
-urls = { "Homepage" = "https://github.com/timBrockman/customer-spend-microservice" }
+urls = { "Homepage" = "https://github.com/timBrockman/customer-spend-api" }
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",

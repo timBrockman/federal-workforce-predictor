@@ -1,4 +1,4 @@
-# Contributing to customer-spend-microservice
+# Contributing to customer-spend-api
 
 Thank you for your interest in contributing!
 
@@ -7,8 +7,8 @@ This is a **reference implementation / educational template**. Contributions tha
 ## Development Setup
 
 ```bash
-git clone https://github.com/<your-org>/customer-spend-microservice.git
-cd customer-spend-microservice
+git clone https://github.com/timBrockman/customer-spend-api.git
+cd customer-spend-api
 uv sync --extra dev
 uv run pre-commit install
 ```
