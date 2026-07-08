@@ -1,0 +1,15 @@
+{
+  "realm": "customer-spend-microservice",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "customer-spend-microservice-api",
+      "enabled": true,
+      "publicClient": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "authorizationServicesEnabled": false
+    }
+  ]
+}

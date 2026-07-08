@@ -1,0 +1,1 @@
+# Placeholder for optional Keycloak realm import.\n# See docs/deployment/docker.md and docs/deployment/auth-providers.md\n# Provide a real keycloak-realm.json here if you want to use the "keycloak" profile.

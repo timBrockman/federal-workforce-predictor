@@ -1,0 +1,90 @@
+[project]
+name = "customer-spend-microservice"
+version = "0.1.0"
+description = "Reference implementation of an ethics-first customer spend intelligence microservice. FastAPI + Strawberry GraphQL (limited), MCP, Alembic, consent-aware auth, and guardrailed AI patterns."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "The customer-spend-microservice contributors" }
+]
+urls = { "Homepage" = "https://github.com/timBrockman/customer-spend-microservice" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "alembic>=1.18.5",
+    "fastapi>=0.139.0",
+    "litellm>=1.91.0",
+    "mcp[cli]>=1.28.1",
+    "pydantic-ai>=2.6.0",
+    "pydantic-settings>=2.14.2",
+    "python-jose[cryptography]>=3.5.0",
+    "slowapi>=0.1.10",
+    "sqlalchemy[asyncio]>=2.0.51",
+    "strawberry-graphql[fastapi]>=0.320.3",
+    "structlog>=24.4.0",
+    "uvicorn[standard]>=0.30.0",
+]
+
+[project.optional-dependencies]
+ml = [
+    "scikit-learn>=1.5.0",
+]
+dev = [
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+    "respx>=0.21.0",
+    "pytest-mock>=3.14.0",
+    "pre-commit>=3.8.0",
+]
+
+[project.scripts]
+customer-spend = "app.main:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q --tb=short"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+filterwarnings = [
+    "ignore:Passing an extension instance to `extensions=\\[\\.\\.\\.\\]`:DeprecationWarning",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+    "respx>=0.21.0",
+    "pytest-mock>=3.14.0",
+    "pre-commit>=3.8.0",
+]

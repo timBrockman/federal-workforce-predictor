@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=false
+      - USE_LOCAL_TEST_KEYS=true
+      - DATABASE_URL=sqlite+aiosqlite:///./data/spend.db
+      - LLM_MODEL=ollama/llama3.2
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - keycloak-optional
+
+  # Optional Keycloak for self-hosted auth testing (profile: keycloak)
+  keycloak-optional:
+    image: quay.io/keycloak/keycloak:25.0
+    profiles: ["keycloak"]
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/keycloak-realm.json:/opt/keycloak/data/import/realm.json:ro
