@@ -140,3 +140,75 @@ class EthicsLogRepository:
         await self.session.commit()
         await self.session.refresh(log)
         return log
+
+
+# =============================================================================
+# New repositories for federal workforce domain (added incrementally)
+# =============================================================================
+
+class EmployeeAssessmentRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(
+        self,
+        user_id: str,
+        skills_inventory: str,
+        performance_level: str,
+        career_goals: str,
+        critical_role_interest: bool = False,
+        consent_for_career_modeling: bool = False,
+        raw_answers: dict[str, Any] | None = None,
+    ) -> "EmployeeAssessment":
+        from app.db.models import EmployeeAssessment
+
+        assessment = EmployeeAssessment(
+            user_id=user_id,
+            skills_inventory=skills_inventory,
+            performance_level=performance_level,
+            career_goals=career_goals,
+            critical_role_interest=critical_role_interest,
+            consent_for_career_modeling=consent_for_career_modeling,
+            raw_answers=raw_answers or {},
+        )
+        self.session.add(assessment)
+        await self.session.commit()
+        await self.session.refresh(assessment)
+        return assessment
+
+    async def get_latest_for_user(self, user_id: str) -> "EmployeeAssessment | None":
+        from app.db.models import EmployeeAssessment
+        from sqlalchemy import select
+
+        result = await self.session.execute(
+            select(EmployeeAssessment)
+            .where(EmployeeAssessment.user_id == user_id)
+            .order_by(EmployeeAssessment.created_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+
+class CareerSignalRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def add_many(self, user_id: str, signals: list[dict[str, Any]]) -> list["CareerSignal"]:
+        from app.db.models import CareerSignal
+        from datetime import datetime
+
+        objs = [
+            CareerSignal(
+                user_id=user_id,
+                signal_type=s["signal_type"],
+                value=s["value"],
+                occurred_at=s.get("occurred_at", datetime.utcnow()),
+                source=s.get("source", "synthetic"),
+            )
+            for s in signals
+        ]
+        self.session.add_all(objs)
+        await self.session.commit()
+        for o in objs:
+            await self.session.refresh(o)
+        return objs
