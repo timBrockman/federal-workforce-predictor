@@ -93,6 +93,17 @@ async def list_tools() -> list[Tool]:
                 "required": ["question"],
             },
         ),
+        Tool(
+            name="get_career_recommendations",
+            description="Get guardrailed career trajectory and critical role readiness recommendations (federal workforce domain). Uses assessments + synthetic signals with ethics. Supports optional user context.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
+                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                },
+            },
+        ),
     ]
 
 
