@@ -91,7 +91,10 @@ def verify_graphql():
     recs = r.json()["data"]["recommendations"]
     print(f"  Recommendations: {len(recs)} items")
 
-    # New career path (high consent)
+    # New career path (high consent) - use demo-user-123 which has seeded career data
+    def get_p_career():
+        return Principal("demo-user-123", ["read:all"], consent_level=2)
+    app.dependency_overrides[get_current_principal] = get_p_career
     q_career = "{ careerRecommendations { recommendationType confidence } }"
     r_career = client.post("/graphql", json={"query": q_career})
     career = r_career.json()["data"]["careerRecommendations"]
