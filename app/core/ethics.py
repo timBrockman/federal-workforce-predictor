@@ -67,9 +67,21 @@ class EthicalPolicy:
     @staticmethod
     def refuse_unethical_request(query: str, principal: Principal) -> tuple[bool, str]:
         q = query.lower()
-        bad_keywords = ["discriminat", "target poor", "exclude based on", "illegal", "harm "]
+        bad_keywords = [
+            "discriminat",
+            "target poor",
+            "exclude based on",
+            "illegal",
+            "harm ",
+            # Federal/HR extensions for career-impacting use (employee lifecycle predictor)
+            "protected class",
+            "gender for promotion",
+            "age for succession",
+            "race for role",
+            "infer demographics for career",
+        ]
         if any(kw in q for kw in bad_keywords):
-            return False, "Request appears to seek unethical or discriminatory use of financial data."
+            return False, "Request appears to seek unethical or discriminatory use (including career trajectory or critical role decisions)."
         return True, "Request passed basic ethics pre-filter"
 
     @staticmethod
