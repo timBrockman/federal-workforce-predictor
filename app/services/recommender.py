@@ -1,6 +1,8 @@
 """Recommender service.
 
-Uses questionnaire + synthetic social (mocked) + optional scikit-learn.
+Originally for spend budget (questionnaire + synthetic social).
+Evolving to support federal workforce / employee lifecycle recommendations
+(career trajectory, skill gaps, critical role readiness).
 
 All outputs go through EthicalPolicy and declare sources.
 """
@@ -21,6 +23,28 @@ SYNTHETIC_PROFILES: dict[str, list[str]] = {
 
 def _get_synthetic_interests(user_id: str) -> list[str]:
     return SYNTHETIC_PROFILES.get(user_id, ["general lifestyle"])
+
+
+# New: synthetic career signals / skills profiles for federal workforce domain
+# (versioned for reproducibility; only used with consent_for_career_modeling)
+SYNTHETIC_CAREER_PROFILES: dict[str, dict[str, Any]] = {
+    "demo-user-123": {
+        "skills": ["python", "cloud", "leadership", "cyber"],
+        "recent_signals": ["advanced cloud cert", "internal transfer to cyber"],
+        "readiness_notes": "strong for critical cyber roles",
+    },
+    "user-ethics-test": {
+        "skills": ["basic"],
+        "recent_signals": [],
+        "readiness_notes": "entry level",
+    },
+}
+
+
+def _get_synthetic_career_profile(user_id: str) -> dict[str, Any]:
+    return SYNTHETIC_CAREER_PROFILES.get(
+        user_id, {"skills": [], "recent_signals": [], "readiness_notes": "general"}
+    )
 
 
 def get_recommendations(
