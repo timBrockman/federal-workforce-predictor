@@ -19,6 +19,8 @@ from app.db.repositories import (
     QuestionnaireRepository,
     TransactionRepository,
     UserRepository,
+    EmployeeAssessmentRepository,
+    CareerSignalRepository,
 )
 
 
@@ -66,6 +68,32 @@ async def main() -> None:
             level=2,
         )
         print("  Consent recorded")
+
+        # --- New federal workforce domain seeding (additive for pivot) ---
+        assess_repo = EmployeeAssessmentRepository(session)
+        existing_assess = await assess_repo.get_latest_for_user("demo-user-123")
+        if not existing_assess:
+            assess = await assess_repo.create(
+                user_id="demo-user-123",
+                skills_inventory="python,cloud,leadership,cyber",
+                performance_level="high",
+                career_goals="lead critical cyber mission team",
+                critical_role_interest=True,
+                consent_for_career_modeling=True,
+                raw_answers={"skills": "python,cloud", "goals": "mission leadership"},
+            )
+            print(f"  EmployeeAssessment id: {assess.id}")
+
+        sig_repo = CareerSignalRepository(session)
+        # Simple check: seed signals only if we just created assessment (rough idempotency for demo)
+        if not existing_assess:
+            demo_signals = [
+                {"signal_type": "training", "value": "advanced cloud cert"},
+                {"signal_type": "mobility", "value": "internal transfer to cyber"},
+                {"signal_type": "cert", "value": "CISSP"},
+            ]
+            await sig_repo.add_many("demo-user-123", demo_signals)
+            print("  Career signals seeded (synthetic)")
 
     print("✅ Demo data seeded (or was already present)")
 
