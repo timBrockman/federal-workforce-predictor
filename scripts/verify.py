@@ -114,6 +114,12 @@ async def verify_mcp():
     res_low = await mcp_call_tool("get_budget_recommendations", {"user_id": "low-consent-user", "consent_level": 0})
     print(f"  get_budget_recommendations (low consent): {len(res_low[0].text)} chars")
 
+    # New federal career path (high + low consent)
+    res_career = await mcp_call_tool("get_career_recommendations", {"consent_level": 2})
+    print(f"  get_career_recommendations (high consent): {len(res_career[0].text)} chars")
+    res_career_low = await mcp_call_tool("get_career_recommendations", {"consent_level": 0})
+    print(f"  get_career_recommendations (low consent): {len(res_career_low[0].text)} chars")
+
     # Full stdio client test (spawns the server) - pass explicit user context
     server_params = StdioServerParameters(
         command="uv", args=["run", "python", "-m", "app.services.mcp_server"]
