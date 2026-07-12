@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This is a reference implementation / template. Only the latest commit on the main branch is considered "supported" for security purposes.
+This is a reference implementation / template. Only the latest commit on the master branch is considered "supported" for security purposes.
 
 | Version | Supported          |
 | ------- | ------------------ |
