@@ -95,3 +95,22 @@ async def test_mcp_stdio_with_explicit_principal():
             data = json.loads(text) if text else {}
             assert data.get("user_id") == "stdio-low"
             assert data.get("allowed") is False or len(data.get("recommendations", [])) == 0
+
+
+@pytest.mark.asyncio
+async def test_mcp_career_recommendations_respects_consent():
+    """High consent should return career recs; low consent should degrade (new federal path)."""
+    # High consent
+    res_high = await mcp_call_tool("get_career_recommendations", {"consent_level": 2})
+    data_high = json.loads(res_high[0].text)
+    assert data_high.get("user_id") == "demo-user-123"
+    assert data_high.get("allowed") is True
+    assert "recommendations" in data_high
+
+    # Low consent
+    res_low = await mcp_call_tool(
+        "get_career_recommendations", {"user_id": "low-consent-mcp", "consent_level": 0}
+    )
+    data_low = json.loads(res_low[0].text)
+    assert data_low.get("user_id") == "low-consent-mcp"
+    assert data_low.get("allowed") is False or len(data_low.get("recommendations", [])) == 0
