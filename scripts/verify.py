@@ -91,6 +91,12 @@ def verify_graphql():
     recs = r.json()["data"]["recommendations"]
     print(f"  Recommendations: {len(recs)} items")
 
+    # New career path (high consent)
+    q_career = "{ careerRecommendations { recommendationType confidence } }"
+    r_career = client.post("/graphql", json={"query": q_career})
+    career = r_career.json()["data"]["careerRecommendations"]
+    print(f"  careerRecommendations: {len(career)} items")
+
     # DB-backed summary
     q2 = "{ spendSummary { totalSpent topCategories } }"
     r2 = client.post("/graphql", json={"query": q2})
