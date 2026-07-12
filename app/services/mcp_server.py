@@ -30,7 +30,7 @@ from app.core.security import Principal
 from app.db.engine import get_session_factory
 from app.db.repositories import TransactionRepository
 from app.services.agent import ask_budget_agent
-from app.services.recommender import get_recommendations
+from app.services.recommender import get_recommendations, get_career_recommendations
 
 
 def _principal_from_args(arguments: dict[str, Any]) -> Principal:
@@ -154,6 +154,21 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         result["consent_level"] = principal.consent_level
         # persist already attempted inside agent; double-tap for MCP top-level
         # (the decision object not returned, but main paths covered via GraphQL + rec path)
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+    elif name == "get_career_recommendations":
+        recs, decision = get_career_recommendations(principal)
+        await persist_decision(decision)
+        if not decision.allowed:
+            result = {"error": decision.reason, "allowed": False, "user_id": principal.user_id}
+        else:
+            result = {
+                "recommendations": recs,
+                "ethical_note": decision.reason,
+                "allowed": True,
+                "user_id": principal.user_id,
+                "consent_level": principal.consent_level,
+            }
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
     else:
