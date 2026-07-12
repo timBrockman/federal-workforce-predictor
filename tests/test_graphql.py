@@ -62,6 +62,21 @@ def test_graphql_recommendations_with_consent(client):
     assert "ethicsNote" in first
 
 
+def test_graphql_career_recommendations_with_consent(client):
+    """Career path (federal workforce use case) exercises recommender + ethics + sources."""
+    query = "{ careerRecommendations { recommendationType targetRole confidence rationale dataSources ethicsNote } }"
+    r = client.post("/graphql", json={"query": query})
+    assert r.status_code == 200
+    body = r.json()
+    assert "data" in body
+    recs = (body.get("data") or {}).get("careerRecommendations") or []
+    assert len(recs) > 0
+    first = recs[0]
+    assert "dataSources" in first
+    assert any("assessment" in str(s).lower() or "synthetic" in str(s).lower() for s in first.get("dataSources", []))
+    assert "ethicsNote" in first
+
+
 @pytest.mark.slow
 def test_graphql_ask_agent_with_consent(client):
     """Agent path (may pull heavier LLM libs on first use)."""
