@@ -1,4 +1,7 @@
-"""Guardrailed Pydantic AI agent for budget questions.
+"""Guardrailed agent (originally for budget questions).
+
+Evolving to support federal workforce / employee lifecycle queries
+(e.g. career trajectory, skill gaps, critical role readiness).
 
 Uses LiteLLM abstraction (default Ollama in template).
 Tools are safe wrappers around other services.
@@ -11,7 +14,7 @@ from typing import Any
 
 from app.core.ethics import EthicalDecision, EthicalPolicy, log_decision, persist_decision
 from app.core.security import Principal
-from app.services.recommender import get_recommendations
+from app.services.recommender import get_recommendations, get_career_recommendations
 
 
 async def ask_budget_agent(
