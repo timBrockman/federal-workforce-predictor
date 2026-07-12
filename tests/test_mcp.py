@@ -20,6 +20,7 @@ async def test_mcp_list_tools():
     assert "get_spend_summary" in names
     assert "get_budget_recommendations" in names
     assert "ask_budget_agent" in names
+    assert "get_career_recommendations" in names
 
 
 @pytest.mark.asyncio
