@@ -45,6 +45,11 @@ async def ask_budget_agent(
     if not principal.has_consent_for_social():
         answer += " (Note: social signals were not used because consent was not granted.)"
 
+    # Small federal pivot integration (career recs when relevant)
+    career_recs, _ = get_career_recommendations(principal, context)
+    if career_recs:
+        answer += f" Career readiness notes: {career_recs}."
+
     decision = EthicalDecision(
         "agent_response",
         principal.user_id,
