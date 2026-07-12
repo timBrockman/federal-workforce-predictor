@@ -50,12 +50,18 @@ async def ask_budget_agent(
     if career_recs:
         answer += f" Career readiness notes: {career_recs}."
 
+    sources = ["questionnaire"]
+    if principal.has_consent_for_social():
+        sources.append("synthetic_social")
+    if career_recs and principal.has_consent_for_social():
+        sources.append("synthetic_career_signals")
+
     decision = EthicalDecision(
         "agent_response",
         principal.user_id,
         True,
         "Passed ethics pre-filter and used declared sources.",
-        data_sources=["questionnaire", "synthetic_social"] if principal.has_consent_for_social() else ["questionnaire"],
+        data_sources=sources,
     )
     log_decision(decision)
     # Phase 2: also persist for audit
