@@ -85,3 +85,47 @@ def get_recommendations(
         r["ethics_note"] = decision.reason
 
     return recs, decision
+
+
+def get_career_recommendations(
+    principal: Principal,
+    assessment: dict[str, Any] | None = None,
+) -> tuple[list[dict[str, Any]], EthicalDecision]:
+    """Workforce readiness / career trajectory recommender (federal pivot).
+
+    Uses assessment + synthetic career signals. All paths through EthicalPolicy.
+    """
+    profile = _get_synthetic_career_profile(principal.user_id)
+    sources = ["assessment"]
+    if principal.has_consent_for_social():
+        sources.append("synthetic_career_signals")
+
+    recs: list[dict[str, Any]] = []
+    skills = profile.get("skills", [])
+    if skills:
+        recs.append({
+            "recommendation_type": "readiness",
+            "target_role": "critical cyber mission lead",
+            "confidence": 0.85,
+            "rationale": f"Skills match: {', '.join(skills[:3])}. {profile.get('readiness_notes', '')}",
+        })
+    if "cyber" in skills:
+        recs.append({
+            "recommendation_type": "skill_gap_fill",
+            "suggested_action": "advanced leadership training",
+            "confidence": 0.78,
+            "rationale": "Gap identified for critical role succession",
+        })
+
+    # Reuse existing policy for now (will extend for HR bias/career impact in later small commit)
+    decision = EthicalPolicy.evaluate_recommendation(principal, sources, {"skills": skills})
+    log_decision(decision)
+
+    if not decision.allowed:
+        return [], decision
+
+    for r in recs:
+        r["data_sources"] = sources
+        r["ethics_note"] = decision.reason
+
+    return recs, decision
