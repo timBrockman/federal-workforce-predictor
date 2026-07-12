@@ -22,6 +22,24 @@ uv run python scripts/verify.py
 
 Always run the verification script before opening a PR.
 
+## Commit Policy (Mandatory)
+
+This project uses **small, single-purpose commits and PRs** with a structured message format.
+
+See **[docs/development/commit-conventions.md](docs/development/commit-conventions.md)** for the full policy.
+
+Key points:
+- One logical, reviewable change per commit.
+- Run relevant tests + `scripts/verify.py` locally before committing.
+- Every commit message (after policy introduction) **must** document:
+  - Why / Context
+  - Design decisions (including what was reused and why)
+  - Tradeoffs considered
+  - Verification performed
+- PRs must also be small and focused.
+
+Violations will be asked to be split before merge.
+
 ## Code Style
 
 - Ruff + ruff-format (enforced via pre-commit)
@@ -30,11 +48,11 @@ Always run the verification script before opening a PR.
 
 ## Pull Requests
 
-1. Fork + create feature branch.
-2. Make focused changes.
+1. Fork + create feature branch (small scope).
+2. Make **focused, atomic changes** (one concern per commit).
 3. Add/update tests and docs.
 4. Run full verification.
-5. Open PR with clear description (what + why).
+5. Open PR with clear description that summarizes the structured commit bodies.
 
 ## Reporting Issues
 
