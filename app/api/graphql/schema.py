@@ -116,6 +116,37 @@ class Query:
         ]
 
     @strawberry.field
+    async def career_recommendations(
+        self, info: Info
+    ) -> list[gql_types.CareerRecommendation]:
+        """New flat field for federal workforce career recommendations."""
+        principal: Principal | None = info.context.get("principal")
+        if not principal:
+            raise GraphQLError(
+                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
+            )
+
+        recs, decision = get_career_recommendations(principal)
+
+        await persist_decision(decision)
+
+        if not decision.allowed:
+            return []
+
+        return [
+            gql_types.CareerRecommendation(
+                recommendation_type=r["recommendation_type"],
+                target_role=r.get("target_role"),
+                suggested_action=r.get("suggested_action"),
+                confidence=r["confidence"],
+                rationale=r["rationale"],
+                data_sources=r["data_sources"],
+                ethics_note=r.get("ethics_note", decision.reason),
+            )
+            for r in recs
+        ]
+
+    @strawberry.field
     async def ask_agent(self, info: Info, question: str) -> gql_types.AgentResponse:
         principal: Principal | None = info.context.get("principal")
         if not principal:
