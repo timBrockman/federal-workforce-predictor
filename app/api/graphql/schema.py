@@ -10,7 +10,7 @@ from app.core.ethics import persist_decision
 from app.core.security import Principal
 from app.db.engine import get_session_factory
 from app.db.repositories import TransactionRepository
-from app.services.recommender import get_recommendations
+from app.services.recommender import get_recommendations, get_career_recommendations
 
 from app.core.config import get_settings
 settings = get_settings()
