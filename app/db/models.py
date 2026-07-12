@@ -1,6 +1,10 @@
-"""SQLAlchemy 2.0 models for the spend budget domain.
+"""SQLAlchemy 2.0 models.
 
-Emphasizes auditability and ethics (consent records + decision logs).
+Originally spend budget domain; evolving to federal workforce / employee
+lifecycle predictor (assessments + synthetic career signals).
+
+Emphasizes auditability and ethics (consent records + decision logs) for
+both domains. Old spend models retained during transition for reference.
 """
 
 from __future__ import annotations
@@ -36,6 +40,13 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
     transactions: Mapped[List["SpendTransaction"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    # New federal workforce relationships (added in same logical model expansion)
+    employee_assessments: Mapped[List["EmployeeAssessment"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    career_signals: Mapped[List["CareerSignal"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -92,3 +103,51 @@ class EthicalDecisionLog(Base):
     classification: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+
+
+# =============================================================================
+# New federal workforce / employee lifecycle domain models
+# (added incrementally; synthetic data only for the reference implementation)
+# =============================================================================
+
+class EmployeeAssessment(Base):
+    """Structured input analogous to the old questionnaire.
+
+    Captures skills, performance signals, career intent, and explicit consent
+    for use in career-trajectory and critical-role recommendations.
+    """
+
+    __tablename__ = "employee_assessments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    skills_inventory: Mapped[str] = mapped_column(Text)  # e.g. "python,cloud,leadership"
+    performance_level: Mapped[str] = mapped_column(String(32))  # high/medium/low + notes
+    career_goals: Mapped[str] = mapped_column(Text)
+    critical_role_interest: Mapped[bool] = mapped_column(Boolean, default=False)
+    consent_for_career_modeling: Mapped[bool] = mapped_column(Boolean, default=False)
+    raw_answers: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship(back_populates="employee_assessments")
+
+
+class CareerSignal(Base):
+    """Synthetic internal mobility / training / performance signals.
+
+    Plays the role that "synthetic social" played in the spend domain.
+    Only used when consent_for_career_modeling is granted.
+    """
+
+    __tablename__ = "career_signals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    signal_type: Mapped[str] = mapped_column(String(64))  # e.g. "mobility", "training", "cert"
+    value: Mapped[str] = mapped_column(String(128))
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    source: Mapped[str] = mapped_column(String(32), default="synthetic")
+
+    user: Mapped["User"] = relationship(back_populates="career_signals")
+
+
