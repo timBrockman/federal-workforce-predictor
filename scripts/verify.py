@@ -143,6 +143,9 @@ async def verify_mcp():
             # Also exercise ask with context
             res3 = await session.call_tool("ask_budget_agent", {"question": "coffee budget?", "consent_level": 1})
             print(f"  ask_budget_agent via stdio (consent=1): OK")
+            # Exercise new career tool via stdio
+            res4 = await session.call_tool("get_career_recommendations", {"user_id": "verify-user-123", "consent_level": 2})
+            print(f"  get_career_recommendations via stdio: OK")
 
     print("✅ MCP server (direct + stdio client) OK")
 
