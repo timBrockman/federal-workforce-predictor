@@ -15,6 +15,21 @@ class BudgetRecommendation:
 
 
 @strawberry.type
+class CareerRecommendation:
+    """Output type for federal workforce / career trajectory recommendations.
+
+    Deliberately flat and limited (see ADR-001).
+    """
+    recommendation_type: str
+    target_role: str | None = None
+    suggested_action: str | None = None
+    confidence: float
+    rationale: str
+    data_sources: list[str]
+    ethics_note: str
+
+
+@strawberry.type
 class AgentResponse:
     answer: str
     sources_used: list[str]
