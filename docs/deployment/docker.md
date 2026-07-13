@@ -11,7 +11,7 @@ The included `Dockerfile` is a standard multi-stage, non-root production image:
 Build:
 
 ```bash
-docker build -t customer-spend-api .
+docker build -t federal-workforce-predictor .
 ```
 
 Run:
@@ -20,7 +20,7 @@ Run:
 docker run --rm -p 8000:8000 \
   -e DATABASE_URL=sqlite+aiosqlite:///./data/spend.db \
   -v $(pwd)/data:/app/data \
-  customer-spend-api
+  federal-workforce-predictor
 ```
 
 ## docker-compose.yml
