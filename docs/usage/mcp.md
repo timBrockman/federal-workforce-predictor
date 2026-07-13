@@ -11,10 +11,9 @@ for t in tools:
 
 Or via stdio client (any MCP host).
 
-Current tools:
-- `get_spend_summary`
-- `get_budget_recommendations`
-- `ask_budget_agent`
+Current tools (legacy + primary federal):
+- `get_spend_summary`, `get_budget_recommendations`, `ask_budget_agent` (legacy reference)
+- `get_career_recommendations`, `submit_assessment` (primary)
 
 ## Calling Tools with Principal Context
 
@@ -25,13 +24,22 @@ All tools accept optional `user_id` and `consent_level` in the arguments object.
 ```python
 from app.services.mcp_server import call_tool
 
-# Default (demo user, full consent)
-res = await call_tool("get_budget_recommendations", {})
+# Default (demo user, full consent) - primary federal
+res = await call_tool("get_career_recommendations", {})
 
 # Explicit low-consent user
-res = await call_tool("get_budget_recommendations", {
+res = await call_tool("get_career_recommendations", {
     "user_id": "user-xyz",
     "consent_level": 0
+})
+
+# Submit assessment example
+res = await call_tool("submit_assessment", {
+    "skills_inventory": "python,cloud,cyber",
+    "performance_level": "high",
+    "career_goals": "lead critical mission",
+    "consent_for_career_modeling": true,
+    "consent_level": 2
 })
 ```
 
@@ -49,8 +57,8 @@ async with stdio_client(server_params) as (read, write):
     async with ClientSession(read, write) as session:
         await session.initialize()
         result = await session.call_tool(
-            "ask_budget_agent",
-            {"question": "How much should I budget for coffee?", "consent_level": 1}
+            "get_career_recommendations",
+            {"user_id": "demo-user-123", "consent_level": 2}
         )
         print(result.content[0].text)
 ```
