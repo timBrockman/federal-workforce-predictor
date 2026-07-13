@@ -14,7 +14,7 @@ It is intentionally a **reference implementation and educational template**, not
 
 ## Key Features (Current State)
 
-- **FastAPI + Strawberry GraphQL** — flat schema (`spendSummary`, `recommendations`, `askAgent`, `submitQuestionnaire`) + depth/cost limiting + structured error extensions (e.g. `UNAUTHENTICATED`).
+- **FastAPI + Strawberry GraphQL** — flat schema (careerRecommendations, submitAssessment, askAgent + legacy spend fields) + depth/cost limiting + structured error extensions (e.g. `UNAUTHENTICATED`).
 - **MCP Server** (official SDK, stdio) — three curated tools. Tools accept optional `user_id` + `consent_level` so callers can exercise different principals.
 - **Async DB** — SQLAlchemy 2.0 + explicit pooling + full Alembic migrations (initial schema included).
 - **Ethics as code** — `EthicalPolicy`, consent gating, refusal, source transparency, `persist_decision` to `EthicalDecisionLog`.
