@@ -72,6 +72,21 @@ async def test_mcp_ask_agent_with_context():
     assert "user_id" in data
 
 
+@pytest.mark.asyncio
+async def test_mcp_submit_assessment():
+    """Submit assessment via MCP and verify success + consent recorded."""
+    res = await mcp_call_tool("submit_assessment", {
+        "skills_inventory": "python,cloud",
+        "performance_level": "high",
+        "career_goals": "cyber leadership",
+        "consent_for_career_modeling": True,
+        "consent_level": 2
+    })
+    data = json.loads(res[0].text)
+    assert data.get("success") is True
+    assert "Assessment recorded" in data.get("message", "")
+
+
 @pytest.mark.slow
 @pytest.mark.asyncio
 async def test_mcp_stdio_with_explicit_principal():
