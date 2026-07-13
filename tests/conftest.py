@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for the customer-spend-api template.
+"""Pytest configuration and fixtures for the federal-workforce-predictor reference.
 
 Provides reusable authenticated clients and principal overrides.
 """
