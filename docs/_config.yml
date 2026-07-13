@@ -4,7 +4,7 @@ description: "Ethics-first reference implementation for federal workforce / tale
 baseurl: ""
 url: "https://timBrockman.github.io/federal-workforce-predictor"
 
-# Use the Primer theme (out-of-the-box supported by GitHub Pages)
-theme: jekyll-theme-primer
+# Use the Hacker theme (out-of-the-box supported by GitHub Pages)
+theme: jekyll-theme-hacker
 
 # This site is a reference/template only.
