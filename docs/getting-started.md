@@ -2,6 +2,8 @@
 
 This guide gets you from zero to a working, authenticated call that demonstrates the key behaviors (consent, ethics, transparency) using the primary federal workforce paths (submit assessment → career recommendations).
 
+> **Warning**: This is a reference implementation for educational purposes. Do not use with real sensitive data or in any production/federal environment without your own security review and authorizations.
+
 ## Prerequisites
 
 - Python 3.11+

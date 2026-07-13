@@ -2,7 +2,7 @@
 
 **Purpose**: Placeholder for mapping the federal-workforce-predictor controls and practices to the NIST AI Risk Management Framework (Govern / Map / Measure / Manage).
 
-This is a reference starting point only — not a complete or certifiable artifact. Expand in small increments.
+This is a reference starting point only — not a complete or certifiable artifact. It does **not** represent an ATO or authorized implementation. Always verify current FedRAMP, NIST, and agency requirements.
 
 ## Govern
 - [x] Risk management policies and procedures (EthicalPolicy class + persist_decision + EthicalDecisionLog)

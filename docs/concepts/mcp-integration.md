@@ -59,5 +59,5 @@ The template demonstrates the clean "principal per call" pattern that works toda
 
 See also:
 - [Principal Model](principal-model.md)
-- [MCP Usage](usage/mcp.md)
+- [MCP Usage](../usage/mcp.md)
 - `app/services/mcp_server.py` (tool schemas + `_principal_from_args`)

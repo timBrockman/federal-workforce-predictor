@@ -1,0 +1,27 @@
+# Minimal Jekyll config for out-of-the-box GitHub Pages
+# Source: /docs folder in repo settings
+title: federal-workforce-predictor
+description: "Ethics-first reference implementation for federal workforce / talent / critical-role readiness predictors. Demonstrates consent-aware auth, limited GraphQL + MCP, STRIDE-AI/OWASP/ATLAS, and NIST/FedRAMP/IL guidance."
+baseurl: ""
+url: "https://timBrockman.github.io/federal-workforce-predictor"
+
+# Use default/minima theme (out-of-the-box)
+theme: minima
+
+# Simple navigation
+header_pages:
+  - getting-started.md
+  - architecture.md
+  - use-cases.md
+  - concepts/ethics-and-consent.md
+  - compliance/nist-ai-rmf-crosswalk.md
+  - threat-models/STRIDE-AI-initial.md
+  - usage/graphql.md
+  - extending/adding-a-recommendation-path.md
+
+# Plugins (standard for GitHub Pages)
+plugins:
+  - jekyll-feed
+
+# Disclaimers
+# This site is a reference/template only.

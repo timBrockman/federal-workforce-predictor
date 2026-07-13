@@ -23,5 +23,11 @@ What you expected to happen.
 - uv version:
 - OS:
 
+**Is this a problem with the reference patterns themselves, or just the example code?**
+- [ ] Bug in the core patterns (Principal, EthicalPolicy, consent flow, etc.)
+- [ ] Bug in the federal workforce example code
+- [ ] Documentation / example issue
+- [ ] Other
+
 **Additional context**
 Add any other context about the problem here.

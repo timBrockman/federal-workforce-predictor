@@ -12,6 +12,8 @@ This project demonstrates real patterns used in production AI systems:
 
 It is intentionally a **reference implementation and educational template**, not a complete drop-in production application.
 
+> **Important Disclaimer**: This is a learning reference and demonstration of patterns only. It is **not** a FedRAMP authorized system, does not constitute an ATO, and should not be used with real PII, CUI, or in production environments without significant additional review, testing, and authorization. Always verify the latest FedRAMP, NIST AI RMF, and DoD IL requirements for your use case. The published documentation site (GitHub Pages) carries the same disclaimer.
+
 ## Key Features (Current State)
 
 - **FastAPI + Strawberry GraphQL** — flat schema (careerRecommendations, submitAssessment, askAgent + legacy spend fields) + depth/cost limiting + structured error extensions (e.g. `UNAUTHENTICATED`).
@@ -97,7 +99,9 @@ This exercises DB, auth, recommender, ethics, GraphQL, and MCP (direct + stdio) 
 
 ## Documentation
 
-This README gets you running. For depth, see the `docs/` folder:
+**Browse the full documentation as a nice site:** https://timBrockman.github.io/federal-workforce-predictor/ (powered by out-of-the-box GitHub Pages from the `/docs` folder).
+
+This README gets you running. For depth, see the `docs/` folder (source of the site above):
 
 - [Getting Started](docs/getting-started.md)
 - [Configuration Reference](docs/configuration.md) (every env var + ethics impact)

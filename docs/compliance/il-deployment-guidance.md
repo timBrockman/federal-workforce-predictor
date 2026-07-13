@@ -21,4 +21,4 @@ See plan.md (MVP), expanded STRIDE-AI (7 threats), and NIST crosswalk for relate
 
 **IL5/IL6 note**: This public repo provides patterns and guidance only. Real deployments require ATO, cleared personnel for IL6, and additional overlays (e.g. DoD 8500, CNSSI 1253).
 
-*This is reference guidance only — obtain ATO from your Authorizing Official.*
+*This is reference guidance only. Obtain ATO from your Authorizing Official and perform your own due diligence.*
