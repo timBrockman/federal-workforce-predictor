@@ -73,10 +73,16 @@ curl -H "Authorization: Bearer $LOW_TOKEN" ...  # see ethics degradation
 uv run python -m app.services.mcp_server
 ```
 
-Connect any MCP client. Example tool call with explicit principal context:
+Connect any MCP client. Example tool call with explicit principal context (primary federal path):
 
 ```json
-{"name": "get_budget_recommendations", "arguments": {"user_id": "demo-user-123", "consent_level": 2}}
+{"name": "get_career_recommendations", "arguments": {"user_id": "demo-user-123", "consent_level": 2}}
+```
+
+Or the submit flow:
+
+```json
+{"name": "submit_assessment", "arguments": {"skills_inventory": "python,cloud,cyber", "performance_level": "high", "career_goals": "lead critical mission", "consent_for_career_modeling": true, "consent_level": 2}}
 ```
 
 See `docs/usage/mcp.md` for full details.
