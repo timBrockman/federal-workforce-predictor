@@ -77,6 +77,21 @@ def test_graphql_career_recommendations_with_consent(client):
     assert "ethicsNote" in first
 
 
+def test_graphql_career_recommendations_low_consent():
+    """Low consent should degrade career recs (no synthetic career signals)."""
+    def _override_low():
+        return Principal("low-consent-user", ["read:all"], consent_level=0)
+
+    app.dependency_overrides[get_current_principal] = _override_low
+    c = TestClient(app)
+    query = "{ careerRecommendations { recommendationType } }"
+    r = c.post("/graphql", json={"query": query})
+    assert r.status_code == 200
+    recs = (r.json().get("data") or {}).get("careerRecommendations") or []
+    assert len(recs) == 0
+    app.dependency_overrides.clear()
+
+
 @pytest.mark.slow
 def test_graphql_ask_agent_with_consent(client):
     """Agent path (may pull heavier LLM libs on first use)."""
