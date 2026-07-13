@@ -1,9 +1,13 @@
 """Tests for auth + ethics - core production concerns."""
 
+import httpx
 import pytest
+import respx
+from fastapi import HTTPException
 
-from app.core.ethics import EthicalPolicy, clear_log_for_tests, log_decision
-from app.core.security import Principal, create_demo_token, get_test_public_key
+from app.core.config import get_settings
+from app.core.ethics import EthicalPolicy, clear_log_for_tests
+from app.core.security import Principal, create_demo_token, get_token_via_client_credentials
 from app.services.recommender import get_recommendations
 
 
@@ -44,14 +48,6 @@ def test_recommendation_with_consent():
     assert len(recs) > 0
 
 
-# --- Basic tests for client_credentials helper (Phase 1) ---
-import pytest
-import respx
-import httpx
-from app.core.security import get_token_via_client_credentials
-from app.core.config import get_settings
-
-
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_token_via_client_credentials_success(monkeypatch):
@@ -72,8 +68,6 @@ async def test_get_token_via_client_credentials_error(monkeypatch):
     token_url = "https://example.auth0.com/oauth/token"
     monkeypatch.setattr(get_settings(), "auth0_token_url", token_url)
 
-    respx.post(token_url).mock(
-        return_value=httpx.Response(401, json={"error": "invalid_client"})
-    )
-    with pytest.raises(Exception):  # HTTPException or runtime
+    respx.post(token_url).mock(return_value=httpx.Response(401, json={"error": "invalid_client"}))
+    with pytest.raises(HTTPException):
         await get_token_via_client_credentials("bad", "bad")

@@ -5,6 +5,8 @@ Even for SQLite we configure pooling sensibly (WAL mode recommended for concurre
 
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -56,7 +58,7 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
     return _session_factory
 
 
-async def get_db_session() -> AsyncSession:
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency for DB session (per-request)."""
     factory = get_session_factory()
     async with factory() as session:

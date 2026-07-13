@@ -6,13 +6,14 @@ Uses dependency overrides for reliable auth in tests (avoids header parsing edge
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.security import Principal, get_current_principal
 from app.main import app
-from app.core.security import Principal, create_demo_token, get_current_principal
 
 
 @pytest.fixture
 def client():
     """Test client with authenticated principal override (consent for social)."""
+
     def _override_principal():
         return Principal(
             user_id="demo-user-123",
@@ -36,7 +37,7 @@ def test_health_and_demo_token(client):
 
 
 def test_graphql_recommendations_requires_auth():
-    """Without auth, we now return a proper GraphQL error (200 + errors) thanks to GraphQLError in resolvers."""
+    """Without auth, return a proper GraphQL error from resolver auth checks."""
     raw_client = TestClient(app)
     query = "{ recommendations { category } }"
     r = raw_client.post("/graphql", json={"query": query})
@@ -58,13 +59,18 @@ def test_graphql_recommendations_with_consent(client):
     assert len(recs) > 0
     first = recs[0]
     assert "dataSources" in first
-    assert any("synthetic" in s.lower() or "questionnaire" in s.lower() for s in first["dataSources"])
+    assert any(
+        "synthetic" in s.lower() or "questionnaire" in s.lower() for s in first["dataSources"]
+    )
     assert "ethicsNote" in first
 
 
 def test_graphql_career_recommendations_with_consent(client):
     """Career path (federal workforce use case) exercises recommender + ethics + sources."""
-    query = "{ careerRecommendations { recommendationType targetRole confidence rationale dataSources ethicsNote } }"
+    query = (
+        "{ careerRecommendations { recommendationType targetRole "
+        "confidence rationale dataSources ethicsNote } }"
+    )
     r = client.post("/graphql", json={"query": query})
     assert r.status_code == 200
     body = r.json()
@@ -73,12 +79,16 @@ def test_graphql_career_recommendations_with_consent(client):
     assert len(recs) > 0
     first = recs[0]
     assert "dataSources" in first
-    assert any("assessment" in str(s).lower() or "synthetic" in str(s).lower() for s in first.get("dataSources", []))
+    assert any(
+        "assessment" in str(s).lower() or "synthetic" in str(s).lower()
+        for s in first.get("dataSources", [])
+    )
     assert "ethicsNote" in first
 
 
 def test_graphql_career_recommendations_low_consent():
     """Low consent should degrade career recs (no synthetic career signals)."""
+
     def _override_low():
         return Principal("low-consent-user", ["read:all"], consent_level=0)
 
@@ -94,7 +104,7 @@ def test_graphql_career_recommendations_low_consent():
 
 def test_graphql_submit_assessment(client):
     """Submit assessment via GraphQL and verify success."""
-    mutation = '''
+    mutation = """
     mutation {
       submitAssessment(input: {
         skillsInventory: "python,cloud",
@@ -103,7 +113,7 @@ def test_graphql_submit_assessment(client):
         consentForCareerModeling: true
       }) { success message }
     }
-    '''
+    """
     r = client.post("/graphql", json={"query": mutation})
     assert r.status_code == 200
     data = r.json()["data"]["submitAssessment"]
@@ -114,7 +124,10 @@ def test_graphql_submit_assessment(client):
 @pytest.mark.slow
 def test_graphql_ask_agent_with_consent(client):
     """Agent path (may pull heavier LLM libs on first use)."""
-    query = '{ askAgent(question: "What is a reasonable coffee budget?") { answer sourcesUsed ethicalDecision } }'
+    query = (
+        '{ askAgent(question: "What is a reasonable coffee budget?") '
+        "{ answer sourcesUsed ethicalDecision } }"
+    )
     r = client.post("/graphql", json={"query": query})
     assert r.status_code == 200
     body = r.json()
@@ -126,8 +139,9 @@ def test_graphql_ask_agent_with_consent(client):
 
 
 def test_graphql_query_depth_limit(client):
-    """Overly deep or invalid nested queries are rejected (production safety via limiter + schema validation)."""
-    # Build a query that would be deep; due to flat schema it triggers field error, but still produces GraphQL errors.
+    """Overly deep/invalid nested queries are rejected for production safety."""
+    # Build a query that would be deep; with this flat schema it still
+    # produces GraphQL errors (field mismatch / depth guard interaction).
     deep = "{ " + "recommendations { category " * 5 + "}" * 5 + " }"
     r = client.post("/graphql", json={"query": deep})
     assert r.status_code == 200

@@ -6,8 +6,8 @@ Provides reusable authenticated clients and principal overrides.
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.core.security import Principal, get_current_principal
+from app.main import app
 
 
 @pytest.fixture
@@ -23,6 +23,7 @@ def auth_principal():
 @pytest.fixture
 def client(auth_principal):
     """TestClient with principal dependency overridden."""
+
     def _get_principal():
         return auth_principal
 

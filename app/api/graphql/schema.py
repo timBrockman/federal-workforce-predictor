@@ -1,22 +1,22 @@
 """Strawberry schema - deliberately flat and limited."""
 
+from typing import Any
+
 import strawberry
-from strawberry.exceptions import GraphQLError
+from graphql import GraphQLError
 from strawberry.extensions import QueryDepthLimiter, SchemaExtension
 from strawberry.types import Info
 
 from app.api.graphql import types as gql_types
+from app.core.config import get_settings
 from app.core.ethics import persist_decision
 from app.core.security import Principal
 from app.db.engine import get_session_factory
-from app.db.repositories import TransactionRepository
-from app.services.recommender import get_recommendations, get_career_recommendations
+from app.db.repositories import EmployeeAssessmentRepository, TransactionRepository
+from app.services.recommender import get_career_recommendations, get_recommendations
 
-from app.db.engine import get_session_factory
-from app.db.repositories import EmployeeAssessmentRepository
-
-from app.core.config import get_settings
 settings = get_settings()
+
 
 class QueryLimitExtension(SchemaExtension):
     """Simple production-grade guard against deep nesting and expensive queries.
@@ -24,7 +24,8 @@ class QueryLimitExtension(SchemaExtension):
     Uses settings.graphql_max_query_depth and graphql_max_query_cost.
     This is a lightweight version; real systems often use graphql-query-complexity.
     """
-    def on_execute(self):
+
+    def on_execute(self) -> None:  # type: ignore[override]
         # Enforce limits on the parsed document (runs for every operation)
         document = getattr(self.execution_context, "graphql_document", None)
         if not document:
@@ -33,7 +34,7 @@ class QueryLimitExtension(SchemaExtension):
         max_depth = settings.graphql_max_query_depth
         max_cost = settings.graphql_max_query_cost
 
-        def calc(node, depth=0):
+        def calc(node: object, depth: int = 0) -> int:
             if depth > max_depth:
                 raise GraphQLError(f"Query too deep (max depth {max_depth})")
             cost = 1
@@ -47,11 +48,12 @@ class QueryLimitExtension(SchemaExtension):
             if total_cost > max_cost:
                 raise GraphQLError(f"Query too expensive (cost {total_cost} > {max_cost})")
 
-# Lazy import for the heavy agent (Pydantic AI + LLM libs) to keep app startup light
-def _ask_budget_agent(*a, **kw):
-    from app.services.agent import ask_budget_agent as _impl
-    return _impl(*a, **kw)
 
+# Lazy import for the heavy agent (Pydantic AI + LLM libs) to keep app startup light
+def _ask_budget_agent(principal: Principal, question: str) -> Any:
+    from app.services.agent import ask_budget_agent as _impl
+
+    return _impl(principal, question)
 
 
 @strawberry.type
@@ -61,15 +63,11 @@ class Query:
         return "ok"
 
     @strawberry.field
-    async def career_recommendations(
-        self, info: Info
-    ) -> list[gql_types.CareerRecommendation]:
+    async def career_recommendations(self, info: Info) -> list[gql_types.CareerRecommendation]:
         """New flat field for federal workforce career recommendations."""
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         # Fetch latest assessment so recommender uses real submitted data (not only synthetic)
         assessment = None
@@ -100,14 +98,13 @@ class Query:
             for r in recs
         ]
 
-    # Legacy spend path (kept for reference during pivot; new federal paths are career_* and submit_assessment)
+    # Legacy spend path (kept for reference during pivot;
+    # new federal paths are career_* and submit_assessment)
     @strawberry.field
     async def spend_summary(self, info: Info) -> gql_types.SpendSummary:
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         factory = get_session_factory()
         async with factory() as session:
@@ -133,9 +130,7 @@ class Query:
     ) -> list[gql_types.BudgetRecommendation]:
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         recs, decision = get_recommendations(
             principal, {"income_bracket": income_bracket or "medium"}
@@ -164,9 +159,7 @@ class Query:
     async def ask_agent(self, info: Info, question: str) -> gql_types.AgentResponse:
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         result = await _ask_budget_agent(principal, question)
         # Note: agent already attempts persist via create_task; we can also ensure here if needed.
@@ -188,12 +181,10 @@ class Mutation:
     ) -> gql_types.MutationResult:
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         from app.db.engine import get_session_factory
-        from app.db.repositories import QuestionnaireRepository, ConsentRepository
+        from app.db.repositories import ConsentRepository, QuestionnaireRepository
 
         factory = get_session_factory()
         async with factory() as session:
@@ -227,12 +218,10 @@ class Mutation:
     ) -> gql_types.MutationResult:
         principal: Principal | None = info.context.get("principal")
         if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
+            raise GraphQLError("Not authenticated", extensions={"code": "UNAUTHENTICATED"})
 
         from app.db.engine import get_session_factory
-        from app.db.repositories import EmployeeAssessmentRepository, ConsentRepository
+        from app.db.repositories import ConsentRepository, EmployeeAssessmentRepository
 
         factory = get_session_factory()
         async with factory() as session:

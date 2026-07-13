@@ -13,14 +13,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.db.engine import init_db, get_session_factory
+from app.db.engine import get_session_factory, init_db
 from app.db.repositories import (
+    CareerSignalRepository,
     ConsentRepository,
+    EmployeeAssessmentRepository,
     QuestionnaireRepository,
     TransactionRepository,
     UserRepository,
-    EmployeeAssessmentRepository,
-    CareerSignalRepository,
 )
 
 

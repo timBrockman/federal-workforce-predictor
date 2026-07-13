@@ -1,7 +1,8 @@
 """SQLAlchemy 2.0 models.
 
-Originally spend budget domain; evolving to federal workforce / employee lifecycle + career readiness (EmployeeAssessment, CareerSignal)
-lifecycle predictor (assessments + synthetic career signals).
+Originally spend budget domain; evolving to a federal workforce/employee
+lifecycle predictor (EmployeeAssessment, CareerSignal, and synthetic
+career signals).
 
 Emphasizes auditability and ethics (consent records + decision logs) for
 both domains. Old spend models retained during transition for reference.
@@ -10,7 +11,7 @@ both domains. Old spend models retained during transition for reference.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -36,17 +37,17 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    questionnaire_responses: Mapped[List["QuestionnaireResponse"]] = relationship(
+    questionnaire_responses: Mapped[list[QuestionnaireResponse]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    transactions: Mapped[List["SpendTransaction"]] = relationship(
+    transactions: Mapped[list[SpendTransaction]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
     # New federal workforce relationships (added in same logical model expansion)
-    employee_assessments: Mapped[List["EmployeeAssessment"]] = relationship(
+    employee_assessments: Mapped[list[EmployeeAssessment]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    career_signals: Mapped[List["CareerSignal"]] = relationship(
+    career_signals: Mapped[list[CareerSignal]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -60,10 +61,10 @@ class QuestionnaireResponse(Base):
     goals: Mapped[str] = mapped_column(Text)
     risk_tolerance: Mapped[str] = mapped_column(String(32))
     has_social_consent: Mapped[bool] = mapped_column(Boolean, default=False)
-    raw_answers: Mapped[dict] = mapped_column(JSON, default=dict)
+    raw_answers: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    user: Mapped["User"] = relationship(back_populates="questionnaire_responses")
+    user: Mapped[User] = relationship(back_populates="questionnaire_responses")
 
 
 class SpendTransaction(Base):
@@ -77,7 +78,7 @@ class SpendTransaction(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     source: Mapped[str] = mapped_column(String(32), default="user")
 
-    user: Mapped["User"] = relationship(back_populates="transactions")
+    user: Mapped[User] = relationship(back_populates="transactions")
 
 
 class ConsentRecord(Base):
@@ -102,13 +103,14 @@ class EthicalDecisionLog(Base):
     data_sources: Mapped[list[str]] = mapped_column(JSON, default=list)
     classification: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict)
 
 
 # =============================================================================
 # New federal workforce / employee lifecycle domain models
 # (added incrementally; synthetic data only for the reference implementation)
 # =============================================================================
+
 
 class EmployeeAssessment(Base):
     """Structured input analogous to the old questionnaire.
@@ -126,10 +128,10 @@ class EmployeeAssessment(Base):
     career_goals: Mapped[str] = mapped_column(Text)
     critical_role_interest: Mapped[bool] = mapped_column(Boolean, default=False)
     consent_for_career_modeling: Mapped[bool] = mapped_column(Boolean, default=False)
-    raw_answers: Mapped[dict] = mapped_column(JSON, default=dict)
+    raw_answers: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    user: Mapped["User"] = relationship(back_populates="employee_assessments")
+    user: Mapped[User] = relationship(back_populates="employee_assessments")
 
 
 class CareerSignal(Base):
@@ -148,6 +150,4 @@ class CareerSignal(Base):
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     source: Mapped[str] = mapped_column(String(32), default="synthetic")
 
-    user: Mapped["User"] = relationship(back_populates="career_signals")
-
-
+    user: Mapped[User] = relationship(back_populates="career_signals")

@@ -1,16 +1,16 @@
+import sys
 from logging.config import fileConfig
 from pathlib import Path
-import sys
 
-from sqlalchemy import engine_from_config, pool, create_engine
+from sqlalchemy import create_engine, pool
 
 from alembic import context
 
 # Make sure app is importable when alembic runs from root
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.db.models import Base
 from app.core.config import get_settings
+from app.db.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -34,6 +34,7 @@ def get_sync_url() -> str:
         url = url.replace("+aiosqlite", "")
     # Add other async->sync mappings here if swapping to asyncpg etc.
     return url
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -76,9 +77,7 @@ def run_migrations_online() -> None:
     connectable = create_engine(url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

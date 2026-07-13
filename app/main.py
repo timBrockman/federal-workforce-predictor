@@ -8,7 +8,9 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any, cast
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,7 +34,9 @@ from app.db.repositories import TransactionRepository, UserRepository
 settings = get_settings()
 
 
-def get_context(principal: Principal | None = Depends(get_current_principal)) -> dict:
+def get_context(
+    principal: Principal | None = Depends(get_current_principal),  # noqa: B008
+) -> dict[str, Principal | None]:
     return {"principal": principal}
 
 
@@ -44,7 +48,7 @@ graphql_router = GraphQLRouter(
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     print(f"🚀 Starting {settings.app_name} (Ollama default: {settings.llm_model})")
     await init_db()
     print("   - DB initialized (tables created if needed)")
@@ -85,7 +89,10 @@ app = FastAPI(
 )
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(
+    RateLimitExceeded,
+    cast(Any, _rate_limit_exceeded_handler),
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -97,12 +104,12 @@ app.add_middleware(
 
 
 @app.get("/health", tags=["ops"])
-async def health():
+async def health() -> dict[str, str]:
     return {"status": "healthy", "service": settings.app_name}
 
 
 @app.get("/ready", tags=["ops"])
-async def ready():
+async def ready() -> dict[str, str]:
     return {"status": "ready"}
 
 
@@ -112,7 +119,7 @@ async def demo_token(
     consent: int = 2,
     client_id: str | None = None,
     client_secret: str | None = None,
-):
+) -> dict[str, str]:
     """Dev convenience. In production obtain real tokens via Auth0/Keycloak client credentials flow.
 
     If client_id and client_secret provided, performs real exchange.
@@ -129,15 +136,19 @@ app.include_router(graphql_router)
 # Minimal human interface explorer
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+
 @app.get("/explorer", include_in_schema=False)
-async def explorer():
+async def explorer() -> Any:
     from fastapi.responses import FileResponse
+
     return FileResponse("app/static/explorer.html")
+
 
 # MCP server is implemented in app/services/mcp_server.py
 # Run it standalone with:
 #   uv run python -m app.services.mcp_server
-# It exposes the same curated tools (get_spend_summary, get_budget_recommendations, ask_budget_agent)
+# It exposes the same curated tools:
+# get_spend_summary, get_budget_recommendations, ask_budget_agent
 # using the official MCP SDK (stdio transport).
 
 

@@ -16,9 +16,10 @@ from app.db.repositories import (
 @pytest.fixture
 async def db_session():
     """Provide a fresh async session for repo tests."""
+    from sqlalchemy import text
+
     from app.db.engine import get_engine
     from app.db.models import Base
-    from sqlalchemy import text
 
     engine = get_engine()
     async with engine.begin() as conn:
@@ -88,9 +89,7 @@ async def test_consent_repo(db_session: AsyncSession):
     await user_repo.get_or_create("u3")
 
     repo = ConsentRepository(db_session)
-    rec = await repo.record_consent(
-        user_id="u3", purpose="test", granted=True, level=2
-    )
+    rec = await repo.record_consent(user_id="u3", purpose="test", granted=True, level=2)
     assert rec.user_id == "u3"
 
 

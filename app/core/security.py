@@ -16,14 +16,13 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
+import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from jose.backends.rsa_backend import RSAKey  # type: ignore[attr-defined]
 from pydantic import BaseModel
-import httpx
 
 from app.core.config import get_settings
 
@@ -164,9 +163,13 @@ async def verify_token(credentials: HTTPAuthorizationCredentials | None) -> Prin
 
 
 async def get_current_principal(
-    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),  # noqa: B008
 ) -> Principal | None:
-    """FastAPI dependency. Returns None if unauthenticated (GraphQL resolvers should raise GraphQLError for protected fields)."""
+    """FastAPI dependency.
+
+    Returns None if unauthenticated (GraphQL resolvers should raise GraphQLError
+    for protected fields).
+    """
     if not credentials:
         return None
     try:
@@ -199,7 +202,7 @@ def create_demo_token(
         "consent_level": consent_level,
         "email": f"{user_id}@example.com",
     }
-    return jwt.encode(claims, private, algorithm="RS256")
+    return cast(str, jwt.encode(claims, private, algorithm="RS256"))
 
 
 def get_test_public_key() -> str:
@@ -210,9 +213,7 @@ def get_test_public_key() -> str:
     return public
 
 
-async def get_token_via_client_credentials(
-    client_id: str, client_secret: str
-) -> str:
+async def get_token_via_client_credentials(client_id: str, client_secret: str) -> str:
     """Perform real client_credentials exchange with the IdP (Auth0/Keycloak).
 
     Returns the access_token (JWT). Uses respx mocks in tests.
@@ -238,4 +239,4 @@ async def get_token_via_client_credentials(
                 detail=f"Token exchange failed: {resp.text}",
             )
         token_data = resp.json()
-        return token_data["access_token"]
+        return cast(str, token_data["access_token"])
