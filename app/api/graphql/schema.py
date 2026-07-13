@@ -60,6 +60,7 @@ class Query:
     async def health(self) -> str:
         return "ok"
 
+    # Legacy spend path (kept for reference during pivot; new federal paths are career_* and submit_assessment)
     @strawberry.field
     async def spend_summary(self, info: Info) -> gql_types.SpendSummary:
         principal: Principal | None = info.context.get("principal")
@@ -85,6 +86,7 @@ class Query:
             month="2026-06",
         )
 
+    # Legacy spend recommendations (kept during pivot)
     @strawberry.field
     async def recommendations(
         self, info: Info, income_bracket: str | None = None
@@ -179,6 +181,7 @@ class Query:
 
 @strawberry.type
 class Mutation:
+    # Legacy submit (kept during pivot; use submit_assessment for new domain)
     @strawberry.mutation
     async def submit_questionnaire(
         self, info: Info, input: gql_types.QuestionnaireInput
