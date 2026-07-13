@@ -8,7 +8,7 @@ federal-workforce-predictor deliberately uses a **flat schema** with strict guar
 
 ## Design Decisions
 
-- Only top-level fields: `health`, `spendSummary`, `recommendations`, `askAgent`.
+- Only top-level fields (new primary first): `health`, `careerRecommendations`, `submitAssessment`, `askAgent` (+ legacy spend fields).
 - Mutation: `submitQuestionnaire`.
 - No deep nesting of related objects.
 - Types are simple value objects (see `app/api/graphql/types.py`).

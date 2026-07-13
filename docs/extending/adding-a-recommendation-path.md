@@ -28,7 +28,7 @@ Keep it flat.
 
 Update the tool description and the `call_tool` handler in `mcp_server.py` if you want the new path available to agents.
 
-Or simply let the existing `get_budget_recommendations` return it.
+Or simply let the existing `get_career_recommendations` (or legacy) return it.
 
 4. **Tests**
 

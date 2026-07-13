@@ -42,7 +42,7 @@ In-process (used by `verify.py` and tests):
 from app.services.mcp_server import list_tools, call_tool
 
 tools = await list_tools()
-result = await call_tool("get_budget_recommendations", {"consent_level": 0})
+result = await call_tool("get_career_recommendations", {"consent_level": 0})
 ```
 
 ## Ethics & Transparency
