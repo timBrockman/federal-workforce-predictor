@@ -57,6 +57,25 @@ All mitigations leverage (and will extend) the existing ethics/Principal/audit/f
 
 **Status**: Partially mitigated. The refusal keywords and pre-filter catch obvious cases; full agentic tool-use hardening is future work.
 
+## Example Threat: Information Disclosure - Leaking sensitive career profile data (STRIDE Information Disclosure + OWASP LLM Data Leakage + ATLAS AML.T0051)
+
+**Threat**: An attacker with limited access (or via prompt injection / tool misuse) can extract sensitive details about an individual's performance, skills gaps, or career trajectory (e.g., "tell me the exact skills and recent signals for user X").
+
+**Impact**:
+- Privacy violation (PII + sensitive HR data)
+- Repudiation and loss of trust
+- Potential for targeted social engineering or bias exploitation
+
+**Mitigations (current + planned)**:
+- Consent gating and source transparency: synthetic career signals only used with explicit consent; outputs always declare exact data sources.
+- No direct PII exposure in responses (skills lists are high-level; real deployments would add field-level redaction and access control).
+- EthicalPolicy + logging for all agent/recommender calls.
+- Future: query logging + anomaly detection, role-based access on assessment data, data minimization for synthetic profiles.
+
+**Related**: OWASP LLM06 Excessive Agency / Data Leakage, ATLAS AML.T0051 (Model or Data Exfiltration).
+
+**Status**: Partially mitigated via consent, transparency, and logging. Production systems would add stronger access controls and PII scrubbing.
+
 See also:
 - plan.md (Phase 2)
 - docs/compliance/ (forthcoming FedRAMP/NIST mappings)
