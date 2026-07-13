@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # App
-    app_name: str = "customer-spend-api"
+    app_name: str = "federal-workforce-predictor"
     debug: bool = False
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # In prod: set JWKS_URL + issuer + audience
     auth_jwks_url: str | None = None
     auth_issuer: str = "https://example.auth0.com/"  # override via env for real
-    auth_audience: str = "https://api.customer-spend-api.example.com"
+    auth_audience: str = "https://api.federal-workforce-predictor.example.com"
     # Local test keys (generated at startup for dev/CI - NEVER for prod)
     use_local_test_keys: bool = True
     # For client_id/client_secret flow helper (demo only)
