@@ -1,8 +1,8 @@
 # Architecture Overview
 
-customer-spend-api is deliberately layered so that ethics, consent, and identity are impossible to bypass.
+federal-workforce-predictor is deliberately layered so that ethics, consent, and identity are impossible to bypass.
 
-## High-Level Flow (User asks for budget recommendations)
+## High-Level Flow (User submits assessment → gets career recommendations)
 
 ```
 Client (GraphQL or MCP)
