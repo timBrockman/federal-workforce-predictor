@@ -53,7 +53,7 @@ In another terminal or via curl / GraphiQL:
 # Basic authenticated call (high consent)
 curl -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"query":"{ recommendations { category suggestedMonthlyBudget ethicsNote dataSources } }"}' \
+  -d '{"query":"{ careerRecommendations { recommendationType targetRole confidence rationale dataSources ethicsNote } }"}' \
   http://localhost:8000/graphql
 
 # Low-consent variation (different behavior)
