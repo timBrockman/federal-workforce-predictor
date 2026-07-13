@@ -1,4 +1,4 @@
-"""Async repositories for the spend budget domain.
+"""Async repositories for the (legacy spend +) federal workforce domain.
 
 These provide the data access layer. Services depend on these (not directly on models/engine).
 """

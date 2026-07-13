@@ -2,7 +2,7 @@
 
 Originally for spend budget (questionnaire + synthetic social).
 Evolving to support federal workforce / employee lifecycle recommendations
-(career trajectory, skill gaps, critical role readiness).
+(career trajectory, skill gaps, critical role readiness using assessments + synthetic career signals).
 
 All outputs go through EthicalPolicy and declare sources.
 """

@@ -1,6 +1,6 @@
 """SQLAlchemy 2.0 models.
 
-Originally spend budget domain; evolving to federal workforce / employee
+Originally spend budget domain; evolving to federal workforce / employee lifecycle + career readiness (EmployeeAssessment, CareerSignal)
 lifecycle predictor (assessments + synthetic career signals).
 
 Emphasizes auditability and ethics (consent records + decision logs) for

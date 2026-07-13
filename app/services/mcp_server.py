@@ -1,8 +1,10 @@
-"""Production-grade MCP server for the spend budget service.
+"""Production-grade MCP server for federal-workforce-predictor (evolving from spend budget reference).
 
 Exposes a curated, safe, ethics-aware subset of capabilities as MCP tools.
 Tools are backed by the **exact same** services, ethics policy, and Principal
 model used by the GraphQL layer.
+
+Primary tools: submit_assessment + get_career_recommendations (plus legacy).
 
 Key feature: tools accept optional `user_id` and `consent_level` in arguments
 so that different principals can be exercised (see `_principal_from_args`).
