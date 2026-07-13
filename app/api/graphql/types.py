@@ -52,6 +52,16 @@ class QuestionnaireInput:
     consent_social: bool = False
 
 
+@strawberry.input
+class AssessmentInput:
+    """Input for submitting workforce assessment data (federal pivot)."""
+    skills_inventory: str
+    performance_level: str
+    career_goals: str
+    critical_role_interest: bool = False
+    consent_for_career_modeling: bool = False
+
+
 @strawberry.type
 class MutationResult:
     success: bool
