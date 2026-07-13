@@ -12,7 +12,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    CareerSignal,
     ConsentRecord,
+    EmployeeAssessment,
     EthicalDecisionLog,
     QuestionnaireResponse,
     SpendTransaction,
@@ -75,7 +77,9 @@ class TransactionRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_many(self, user_id: str, transactions: list[dict[str, Any]]) -> list[SpendTransaction]:
+    async def add_many(
+        self, user_id: str, transactions: list[dict[str, Any]]
+    ) -> list[SpendTransaction]:
         objs = [
             SpendTransaction(
                 user_id=user_id,
@@ -114,7 +118,9 @@ class ConsentRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def record_consent(self, user_id: str, purpose: str, granted: bool, level: int) -> ConsentRecord:
+    async def record_consent(
+        self, user_id: str, purpose: str, granted: bool, level: int
+    ) -> ConsentRecord:
         rec = ConsentRecord(user_id=user_id, purpose=purpose, granted=granted, level=level)
         self.session.add(rec)
         await self.session.commit()
@@ -146,6 +152,7 @@ class EthicsLogRepository:
 # New repositories for federal workforce domain (added incrementally)
 # =============================================================================
 
+
 class EmployeeAssessmentRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -159,9 +166,7 @@ class EmployeeAssessmentRepository:
         critical_role_interest: bool = False,
         consent_for_career_modeling: bool = False,
         raw_answers: dict[str, Any] | None = None,
-    ) -> "EmployeeAssessment":
-        from app.db.models import EmployeeAssessment
-
+    ) -> EmployeeAssessment:
         assessment = EmployeeAssessment(
             user_id=user_id,
             skills_inventory=skills_inventory,
@@ -176,10 +181,7 @@ class EmployeeAssessmentRepository:
         await self.session.refresh(assessment)
         return assessment
 
-    async def get_latest_for_user(self, user_id: str) -> "EmployeeAssessment | None":
-        from app.db.models import EmployeeAssessment
-        from sqlalchemy import select
-
+    async def get_latest_for_user(self, user_id: str) -> EmployeeAssessment | None:
         result = await self.session.execute(
             select(EmployeeAssessment)
             .where(EmployeeAssessment.user_id == user_id)
@@ -193,10 +195,7 @@ class CareerSignalRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_many(self, user_id: str, signals: list[dict[str, Any]]) -> list["CareerSignal"]:
-        from app.db.models import CareerSignal
-        from datetime import datetime
-
+    async def add_many(self, user_id: str, signals: list[dict[str, Any]]) -> list[CareerSignal]:
         objs = [
             CareerSignal(
                 user_id=user_id,

@@ -11,25 +11,32 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
-from typing import Any
+from enum import Enum, StrEnum
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from app.db.repositories import EthicsLogRepository
 
 from app.core.security import Principal
 
+
 # Lazy to avoid circulars / heavy import at module load for all paths
-def _get_ethics_repo_session():
+def _get_ethics_repo_session() -> tuple[Callable[..., Any], type[EthicsLogRepository]]:
     from app.db.engine import get_session_factory
     from app.db.repositories import EthicsLogRepository
+
     return get_session_factory, EthicsLogRepository
 
 
-class DataClassification(str, Enum):
+class DataClassification(StrEnum):
     PUBLIC = "public"
     PII = "pii"
     SENSITIVE_INFERENCE = "sensitive_inference"
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     RECOMMENDATION = "recommendation"
     AGENT_RESPONSE = "agent_response"
     SOCIAL_USE = "social_use"
@@ -54,12 +61,16 @@ class EthicalPolicy:
     def check_consent_for_social(principal: Principal) -> tuple[bool, str]:
         if principal.has_consent_for_social():
             return True, "Consent present for synthetic social signals"
-        return False, "No consent for social-derived insights. Set consent_level >= 2 or provide explicit consent."
+        return (
+            False,
+            (
+                "No consent for social-derived insights. "
+                "Set consent_level >= 2 or provide explicit consent."
+            ),
+        )
 
     @staticmethod
-    def require_sources_transparency(
-        sources: list[str], principal: Principal
-    ) -> tuple[bool, str]:
+    def require_sources_transparency(sources: list[str], principal: Principal) -> tuple[bool, str]:
         if not sources:
             return False, "No data sources declared - violating transparency requirement"
         return True, f"Using sources: {', '.join(sources)}"
@@ -81,7 +92,13 @@ class EthicalPolicy:
             "infer demographics for career",
         ]
         if any(kw in q for kw in bad_keywords):
-            return False, "Request appears to seek unethical or discriminatory use (including career trajectory or critical role decisions)."
+            return (
+                False,
+                (
+                    "Request appears to seek unethical or discriminatory use "
+                    "(including career trajectory or critical role decisions)."
+                ),
+            )
         return True, "Request passed basic ethics pre-filter"
 
     @staticmethod
@@ -110,7 +127,9 @@ class EthicalPolicy:
             allowed=True,
             reason=msg,
             data_sources=sources,
-            classification=DataClassification.SENSITIVE_INFERENCE if "social" in sources else DataClassification.PUBLIC,
+            classification=DataClassification.SENSITIVE_INFERENCE
+            if "social" in sources
+            else DataClassification.PUBLIC,
         )
 
 

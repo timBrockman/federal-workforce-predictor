@@ -1,4 +1,6 @@
-"""Production-grade MCP server for federal-workforce-predictor (evolving from spend budget reference).
+"""Production-grade MCP server for federal-workforce-predictor.
+
+Evolving from spend budget reference.
 
 Exposes a curated, safe, ethics-aware subset of capabilities as MCP tools.
 Tools are backed by the **exact same** services, ethics policy, and Principal
@@ -16,6 +18,7 @@ This uses the official MCP Python SDK (stdio transport for now; SSE can be added
 
 See docs/usage/mcp.md and docs/concepts/mcp-integration.md.
 """
+# mypy: disable-error-code="untyped-decorator,no-untyped-call,no-untyped-def"
 
 from __future__ import annotations
 
@@ -25,7 +28,7 @@ from typing import Any
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import TextContent, Tool
 
 from app.core.ethics import persist_decision
 from app.core.security import Principal
@@ -36,7 +39,7 @@ from app.db.repositories import (
     TransactionRepository,
 )
 from app.services.agent import ask_budget_agent
-from app.services.recommender import get_recommendations, get_career_recommendations
+from app.services.recommender import get_career_recommendations, get_recommendations
 
 
 def _principal_from_args(arguments: dict[str, Any]) -> Principal:
@@ -66,63 +69,130 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="get_spend_summary",
-            description="Get aggregated spend summary for the current user (DB-backed). Supports optional user context for MCP clients.",
+            description=(
+                "Get aggregated spend summary for the current user (DB-backed). "
+                "Supports optional user context for MCP clients."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
-                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                    "user_id": {
+                        "type": "string",
+                        "description": "Target user ID (defaults to demo-user-123)",
+                    },
+                    "consent_level": {
+                        "type": "integer",
+                        "description": "Consent level 0-2 (defaults to 2)",
+                    },
                 },
             },
         ),
         Tool(
             name="get_budget_recommendations",
-            description="Get AI-powered budget recommendations (combines questionnaire + synthetic social signals, with ethics guardrails). Supports optional user context.",
+            description=(
+                "Get AI-powered budget recommendations "
+                "(questionnaire + synthetic social signals with ethics guardrails). "
+                "Supports optional user context."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
-                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                    "user_id": {
+                        "type": "string",
+                        "description": "Target user ID (defaults to demo-user-123)",
+                    },
+                    "consent_level": {
+                        "type": "integer",
+                        "description": "Consent level 0-2 (defaults to 2)",
+                    },
                 },
             },
         ),
         Tool(
             name="ask_budget_agent",
-            description="Ask the guardrailed budget agent a question. Returns answer with sources and ethical decision. Supports optional user context.",
+            description=(
+                "Ask the guardrailed budget agent a question. "
+                "Returns answer with sources and ethical decision. "
+                "Supports optional user context."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "question": {"type": "string", "description": "The question to ask the budget agent"},
-                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
-                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                    "question": {
+                        "type": "string",
+                        "description": "The question to ask the budget agent",
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": "Target user ID (defaults to demo-user-123)",
+                    },
+                    "consent_level": {
+                        "type": "integer",
+                        "description": "Consent level 0-2 (defaults to 2)",
+                    },
                 },
                 "required": ["question"],
             },
         ),
         Tool(
             name="get_career_recommendations",
-            description="Get guardrailed career trajectory and critical role readiness recommendations (federal workforce domain). Uses assessments + synthetic signals with ethics. Supports optional user context.",
+            description=(
+                "Get guardrailed career trajectory and critical role readiness "
+                "recommendations (federal workforce domain). "
+                "Uses assessments + synthetic signals with ethics. "
+                "Supports optional user context."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
-                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                    "user_id": {
+                        "type": "string",
+                        "description": "Target user ID (defaults to demo-user-123)",
+                    },
+                    "consent_level": {
+                        "type": "integer",
+                        "description": "Consent level 0-2 (defaults to 2)",
+                    },
                 },
             },
         ),
         Tool(
             name="submit_assessment",
-            description="Submit workforce assessment (skills, performance, career goals, consent flags). Supports optional user context.",
+            description=(
+                "Submit workforce assessment "
+                "(skills, performance, career goals, consent flags). "
+                "Supports optional user context."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "skills_inventory": {"type": "string", "description": "Comma-separated list of skills (e.g. python,cloud,leadership)"},
+                    "skills_inventory": {
+                        "type": "string",
+                        "description": (
+                            "Comma-separated list of skills "
+                            "(e.g. python,cloud,leadership)"
+                        ),
+                    },
                     "performance_level": {"type": "string", "description": "high, medium, or low"},
                     "career_goals": {"type": "string", "description": "Free-text career goals"},
-                    "critical_role_interest": {"type": "boolean", "description": "Interested in critical roles", "default": False},
-                    "consent_for_career_modeling": {"type": "boolean", "description": "Consent to use data for career modeling", "default": False},
-                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
-                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                    "critical_role_interest": {
+                        "type": "boolean",
+                        "description": "Interested in critical roles",
+                        "default": False,
+                    },
+                    "consent_for_career_modeling": {
+                        "type": "boolean",
+                        "description": "Consent to use data for career modeling",
+                        "default": False,
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": "Target user ID (defaults to demo-user-123)",
+                    },
+                    "consent_level": {
+                        "type": "integer",
+                        "description": "Consent level 0-2 (defaults to 2)",
+                    },
                 },
                 "required": ["skills_inventory", "performance_level", "career_goals"],
             },
@@ -243,7 +313,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         return [TextContent(type="text", text=json.dumps({"error": f"unknown tool {name}"}))]
 
 
-async def main():
+async def main() -> None:
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,

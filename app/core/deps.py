@@ -17,7 +17,9 @@ limiter = Limiter(
 )
 
 
-async def get_current_user(principal: Principal = Depends(get_current_principal)) -> Principal:
+async def get_current_user(
+    principal: Principal = Depends(get_current_principal),  # noqa: B008
+) -> Principal:
     """Alias / extension point for future user enrichment."""
     # In future could load user profile from DB here
     return principal

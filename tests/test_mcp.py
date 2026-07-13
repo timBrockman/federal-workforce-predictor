@@ -5,12 +5,13 @@ Both direct (in-process) calls and stdio client are covered.
 """
 
 import json
-import pytest
 
+import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from app.services.mcp_server import call_tool as mcp_call_tool, list_tools as mcp_list_tools
+from app.services.mcp_server import call_tool as mcp_call_tool
+from app.services.mcp_server import list_tools as mcp_list_tools
 
 
 @pytest.mark.asyncio
@@ -75,13 +76,16 @@ async def test_mcp_ask_agent_with_context():
 @pytest.mark.asyncio
 async def test_mcp_submit_assessment():
     """Submit assessment via MCP and verify success + consent recorded."""
-    res = await mcp_call_tool("submit_assessment", {
-        "skills_inventory": "python,cloud",
-        "performance_level": "high",
-        "career_goals": "cyber leadership",
-        "consent_for_career_modeling": True,
-        "consent_level": 2
-    })
+    res = await mcp_call_tool(
+        "submit_assessment",
+        {
+            "skills_inventory": "python,cloud",
+            "performance_level": "high",
+            "career_goals": "cyber leadership",
+            "consent_for_career_modeling": True,
+            "consent_level": 2,
+        },
+    )
     data = json.loads(res[0].text)
     assert data.get("success") is True
     assert "Assessment recorded" in data.get("message", "")
@@ -94,22 +98,21 @@ async def test_mcp_stdio_with_explicit_principal():
     server_params = StdioServerParameters(
         command="uv", args=["run", "python", "-m", "app.services.mcp_server"]
     )
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
-            # Call with explicit low-consent principal (verifies no crash + context passed)
-            result = await session.call_tool(
-                "get_budget_recommendations",
-                {"user_id": "stdio-low", "consent_level": 0},
-            )
-            # MCP result is typically CallToolResult; content may be TextContent list
-            text = None
-            if hasattr(result, "content") and result.content:
-                first = result.content[0]
-                text = getattr(first, "text", str(first))
-            data = json.loads(text) if text else {}
-            assert data.get("user_id") == "stdio-low"
-            assert data.get("allowed") is False or len(data.get("recommendations", [])) == 0
+    async with stdio_client(server_params) as (read, write), ClientSession(read, write) as session:
+        await session.initialize()
+        # Call with explicit low-consent principal (verifies no crash + context passed)
+        result = await session.call_tool(
+            "get_budget_recommendations",
+            {"user_id": "stdio-low", "consent_level": 0},
+        )
+        # MCP result is typically CallToolResult; content may be TextContent list
+        text = None
+        if hasattr(result, "content") and result.content:
+            first = result.content[0]
+            text = getattr(first, "text", str(first))
+        data = json.loads(text) if text else {}
+        assert data.get("user_id") == "stdio-low"
+        assert data.get("allowed") is False or len(data.get("recommendations", [])) == 0
 
 
 @pytest.mark.asyncio

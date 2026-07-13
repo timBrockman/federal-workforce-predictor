@@ -1,7 +1,6 @@
 """Flat GraphQL types - deliberately limited to avoid nesting problems."""
 
 import strawberry
-from typing import Optional
 
 
 @strawberry.type
@@ -20,6 +19,7 @@ class CareerRecommendation:
 
     Deliberately flat and limited (see ADR-001).
     """
+
     recommendation_type: str
     target_role: str | None = None
     suggested_action: str | None = None
@@ -55,6 +55,7 @@ class QuestionnaireInput:
 @strawberry.input
 class AssessmentInput:
     """Input for submitting workforce assessment data (federal pivot)."""
+
     skills_inventory: str
     performance_level: str
     career_goals: str

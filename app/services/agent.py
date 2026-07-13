@@ -10,13 +10,20 @@ Ethics enforced before and after.
 
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import Any
 
-from app.core.ethics import EthicalDecision, EthicalPolicy, log_decision, persist_decision
+from app.core.ethics import (
+    DecisionType,
+    EthicalDecision,
+    EthicalPolicy,
+    log_decision,
+    persist_decision,
+)
 from app.core.security import Principal
 from app.db.engine import get_session_factory
 from app.db.repositories import EmployeeAssessmentRepository
-from app.services.recommender import get_recommendations, get_career_recommendations
+from app.services.recommender import get_career_recommendations, get_recommendations
 
 
 async def ask_budget_agent(
@@ -26,7 +33,7 @@ async def ask_budget_agent(
     allowed, reason = EthicalPolicy.refuse_unethical_request(question, principal)
     if not allowed:
         decision = EthicalDecision(
-            decision_type="agent_response",
+            decision_type=DecisionType.AGENT_RESPONSE,
             user_id=principal.user_id,
             allowed=False,
             reason=reason,
@@ -68,7 +75,7 @@ async def ask_budget_agent(
         sources.append("synthetic_career_signals")
 
     decision = EthicalDecision(
-        "agent_response",
+        DecisionType.AGENT_RESPONSE,
         principal.user_id,
         True,
         "Passed ethics pre-filter and used declared sources.",
@@ -78,11 +85,9 @@ async def ask_budget_agent(
     # Phase 2: also persist for audit
     # (fire and forget in this context; await in callers if top level)
     import asyncio
-    try:
+
+    with suppress(RuntimeError):
         asyncio.create_task(persist_decision(decision))
-    except RuntimeError:
-        # no running loop in some contexts; caller will handle
-        pass
 
     return {
         "answer": answer,
