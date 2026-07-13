@@ -1,6 +1,6 @@
 # The Principal Model
 
-One of the most useful patterns in customer-spend-api is the `Principal` that carries identity **and** consent information through every layer — GraphQL resolvers, services, recommender, agent, **and** MCP tools.
+One of the most useful patterns in federal-workforce-predictor is the `Principal` that carries identity **and** consent information (incl. consent_for_career_modeling) through every layer — GraphQL, services, recommender, agent, **and** MCP tools.
 
 ## Definition
 
@@ -11,7 +11,7 @@ class Principal:
     scopes: list[str]
     consent_level: int = 0
     ...
-    def has_consent_for_social(self) -> bool: ...
+    def has_consent_for_career_modeling(self) -> bool: ...  # plus legacy social
 ```
 
 `consent_level` semantics (current convention):
@@ -25,7 +25,7 @@ The flag `require_consent_for_social` in settings controls whether level < 2 act
 
 1. Auth layer (`get_current_principal`) produces a `Principal` (or `None`).
 2. GraphQL context passes it to every resolver.
-3. Services (`get_recommendations`, `ask_budget_agent`, etc.) receive the principal and must consult `EthicalPolicy`.
+3. Services (get_career_recommendations, submit_assessment, agent, etc.) receive the principal and must consult `EthicalPolicy`.
 4. **MCP** — this is the interesting bit. Because stdio MCP doesn't carry HTTP headers, we pass context **per tool call**:
 
    ```python
