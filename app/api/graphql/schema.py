@@ -60,6 +60,46 @@ class Query:
     async def health(self) -> str:
         return "ok"
 
+    @strawberry.field
+    async def career_recommendations(
+        self, info: Info
+    ) -> list[gql_types.CareerRecommendation]:
+        """New flat field for federal workforce career recommendations."""
+        principal: Principal | None = info.context.get("principal")
+        if not principal:
+            raise GraphQLError(
+                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
+            )
+
+        # Fetch latest assessment so recommender uses real submitted data (not only synthetic)
+        assessment = None
+        factory = get_session_factory()
+        async with factory() as session:
+            a_repo = EmployeeAssessmentRepository(session)
+            assess = await a_repo.get_latest_for_user(principal.user_id)
+            if assess:
+                assessment = {"skills_inventory": assess.skills_inventory}
+
+        recs, decision = get_career_recommendations(principal, assessment)
+
+        await persist_decision(decision)
+
+        if not decision.allowed:
+            return []
+
+        return [
+            gql_types.CareerRecommendation(
+                recommendation_type=r["recommendation_type"],
+                target_role=r.get("target_role"),
+                suggested_action=r.get("suggested_action"),
+                confidence=r["confidence"],
+                rationale=r["rationale"],
+                data_sources=r["data_sources"],
+                ethics_note=r.get("ethics_note", decision.reason),
+            )
+            for r in recs
+        ]
+
     # Legacy spend path (kept for reference during pivot; new federal paths are career_* and submit_assessment)
     @strawberry.field
     async def spend_summary(self, info: Info) -> gql_types.SpendSummary:
@@ -112,46 +152,6 @@ class Query:
             gql_types.BudgetRecommendation(
                 category=r["category"],
                 suggested_monthly_budget=r["suggested_monthly_budget"],
-                confidence=r["confidence"],
-                rationale=r["rationale"],
-                data_sources=r["data_sources"],
-                ethics_note=r.get("ethics_note", decision.reason),
-            )
-            for r in recs
-        ]
-
-    @strawberry.field
-    async def career_recommendations(
-        self, info: Info
-    ) -> list[gql_types.CareerRecommendation]:
-        """New flat field for federal workforce career recommendations."""
-        principal: Principal | None = info.context.get("principal")
-        if not principal:
-            raise GraphQLError(
-                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
-            )
-
-        # Fetch latest assessment so recommender uses real submitted data (not only synthetic)
-        assessment = None
-        factory = get_session_factory()
-        async with factory() as session:
-            a_repo = EmployeeAssessmentRepository(session)
-            assess = await a_repo.get_latest_for_user(principal.user_id)
-            if assess:
-                assessment = {"skills_inventory": assess.skills_inventory}
-
-        recs, decision = get_career_recommendations(principal, assessment)
-
-        await persist_decision(decision)
-
-        if not decision.allowed:
-            return []
-
-        return [
-            gql_types.CareerRecommendation(
-                recommendation_type=r["recommendation_type"],
-                target_role=r.get("target_role"),
-                suggested_action=r.get("suggested_action"),
                 confidence=r["confidence"],
                 rationale=r["rationale"],
                 data_sources=r["data_sources"],
