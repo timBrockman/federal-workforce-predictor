@@ -77,5 +77,5 @@ async def ask_budget_agent(
         "answer": answer,
         "sources_used": decision.data_sources,
         "ethical_decision": decision.reason,
-        "follow_up_questions": ["Would you like to adjust a category?"],
+        "follow_up_questions": ["Would you like to explore career readiness or skill gaps?"],
     }
