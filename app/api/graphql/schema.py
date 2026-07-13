@@ -218,6 +218,49 @@ class Mutation:
             message=f"Questionnaire recorded. Social consent: {input.consent_social}",
         )
 
+    @strawberry.mutation
+    async def submit_assessment(
+        self, info: Info, input: gql_types.AssessmentInput
+    ) -> gql_types.MutationResult:
+        principal: Principal | None = info.context.get("principal")
+        if not principal:
+            raise GraphQLError(
+                "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
+            )
+
+        from app.db.engine import get_session_factory
+        from app.db.repositories import EmployeeAssessmentRepository, ConsentRepository
+
+        factory = get_session_factory()
+        async with factory() as session:
+            a_repo = EmployeeAssessmentRepository(session)
+            await a_repo.create(
+                user_id=principal.user_id,
+                skills_inventory=input.skills_inventory,
+                performance_level=input.performance_level,
+                career_goals=input.career_goals,
+                critical_role_interest=input.critical_role_interest,
+                consent_for_career_modeling=input.consent_for_career_modeling,
+                raw_answers={
+                    "skills_inventory": input.skills_inventory,
+                    "career_goals": input.career_goals,
+                },
+            )
+
+            if input.consent_for_career_modeling:
+                c_repo = ConsentRepository(session)
+                await c_repo.record_consent(
+                    user_id=principal.user_id,
+                    purpose="career_modeling",
+                    granted=True,
+                    level=2,
+                )
+
+        return gql_types.MutationResult(
+            success=True,
+            message=f"Assessment recorded. Career consent: {input.consent_for_career_modeling}",
+        )
+
 
 schema = strawberry.Schema(
     query=Query,
