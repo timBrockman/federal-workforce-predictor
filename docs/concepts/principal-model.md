@@ -43,7 +43,7 @@ Many AI service templates either:
 - Hardcode a user, or
 - Only support auth at the HTTP boundary.
 
-By making `Principal` a first-class, serializable concept that reaches the MCP layer, customer-spend-api demonstrates how to keep authorization + consent consistent across multiple interfaces.
+By making `Principal` a first-class, serializable concept that reaches the MCP layer, federal-workforce-predictor demonstrates how to keep authorization + consent consistent across multiple interfaces.
 
 See:
 - `app/core/security.py`
