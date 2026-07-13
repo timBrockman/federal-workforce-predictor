@@ -7,8 +7,8 @@ This is a **reference implementation / educational template**. Contributions tha
 ## Development Setup
 
 ```bash
-git clone https://github.com/timBrockman/customer-spend-api.git
-cd customer-spend-api
+git clone https://github.com/timBrockman/federal-workforce-predictor.git
+cd federal-workforce-predictor
 uv sync --extra dev
 uv run pre-commit install
 ```
