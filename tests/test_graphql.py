@@ -92,6 +92,25 @@ def test_graphql_career_recommendations_low_consent():
     app.dependency_overrides.clear()
 
 
+def test_graphql_submit_assessment(client):
+    """Submit assessment via GraphQL and verify success."""
+    mutation = '''
+    mutation {
+      submitAssessment(input: {
+        skillsInventory: "python,cloud",
+        performanceLevel: "high",
+        careerGoals: "cyber leadership",
+        consentForCareerModeling: true
+      }) { success message }
+    }
+    '''
+    r = client.post("/graphql", json={"query": mutation})
+    assert r.status_code == 200
+    data = r.json()["data"]["submitAssessment"]
+    assert data["success"] is True
+    assert "Assessment recorded" in data["message"]
+
+
 @pytest.mark.slow
 def test_graphql_ask_agent_with_consent(client):
     """Agent path (may pull heavier LLM libs on first use)."""
