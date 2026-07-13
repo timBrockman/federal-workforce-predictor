@@ -13,7 +13,7 @@
 <input id="token" style="width:100%" placeholder="paste JWT here">
 
 <h3>GraphQL Query</h3>
-<textarea id="query">{ recommendations { category suggestedMonthlyBudget ethicsNote dataSources } }</textarea><br>
+<textarea id="query">{ careerRecommendations { recommendationType targetRole confidence rationale dataSources ethicsNote } }</textarea><br>
 <button onclick="run()">Run</button>
 
 <pre id="out"></pre>
