@@ -1,6 +1,6 @@
-# customer-spend-api
+# federal-workforce-predictor
 
-**Reference implementation** of an ethics-first customer spend intelligence microservice / template.
+**Reference implementation** of an ethics-first federal workforce / talent predictor (employee lifecycle & critical role readiness) microservice / template.
 
 This project demonstrates real patterns used in production AI systems:
 - Consent-aware authentication (Principal model) that flows consistently to GraphQL **and** MCP tools.
