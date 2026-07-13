@@ -1,18 +1,17 @@
 # MCP Integration
 
-customer-spend-api includes a lightweight MCP server (using the official `mcp` Python SDK) that exposes a **curated, safe subset** of the same capabilities available through GraphQL.
+federal-workforce-predictor includes a lightweight MCP server (using the official `mcp` Python SDK) that exposes a **curated, safe subset** of the same capabilities available through GraphQL (submit assessment, career recs, etc.).
 
 ## Why MCP?
 
 MCP lets other AI agents and tools discover and call your service's capabilities in a standardized way. By exposing only the guarded operations, you get the benefits of agent interoperability without opening dangerous or unaudited paths.
 
-## The Three Tools
+## Current Tools (5 total)
 
-- `get_spend_summary` — DB-backed aggregates for a user.
-- `get_budget_recommendations` — ethics-aware recommendations.
-- `ask_budget_agent` — conversational access (currently simulated).
+- Legacy (for reference): get_spend_summary, get_budget_recommendations, ask_budget_agent
+- Primary federal: get_career_recommendations, submit_assessment
 
-All three tools are backed by the **exact same service layer** used by GraphQL.
+All tools backed by the **exact same service + ethics + Principal layer** used by GraphQL. New paths are the focus.
 
 ## Passing Identity & Consent (The Interesting Part)
 
