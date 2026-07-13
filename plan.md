@@ -1,181 +1,151 @@
-# customer-spend-api: Implementation Plan & Re-assessment
+# federal-workforce-predictor: MVP Plan
 
-**Date**: 2026-07-08  
-**Status**: Core implementation + tests + verification largely complete and passing. Documentation + a few wiring gaps remain.  
-**Context**: Built as a production-grade *reference/demo template* for AI services (FastAPI + Strawberry GraphQL (intentionally flat/limited), MCP stdio, async SQLAlchemy + pooling, ethics-first with consent/transparency/refusal/audit, offline Auth0/Keycloak mocks + local RSA keys, recommender + stub Pydantic AI agent, minimal UI).
+**Date**: 2026-07-13  
+**Status**: Core federal employee lifecycle / career readiness paths landed and wired (submitAssessment + careerRecommendations via GraphQL + MCP + recommender + agent + DB fetch). Legacy spend paths kept but de-emphasized + marked. Partial rebrand complete (README, config defaults, explorer, keycloak, app init, some docs). Threat model: 3 examples. Compliance docs: 2 skeletons. All `uv run pytest -m "not slow"`, full pytest, and `scripts/verify.py` green (verified 2026-07-13). Working tree clean.  
+**Context**: Pivoted from customer-spend-api (budget demo) to federal-workforce-predictor reference (structured assessments + synthetic career signals + consent-gated critical-role readiness recs + guardrailed agent + ethics/audit + compliance guidance). Commit discipline: all work as small single-purpose commits/PRs with structured messages. Synthetic data only. No real PII.
 
-## Verification Commands (Run Before Any Changes)
-These must be clean for any further work:
+## Verification Commands (Run Before + After Any Change)
+These must be clean:
 
 ```bash
 uv sync --extra dev
-uv run python -m pytest -m "not slow" -q
+uv run python -m pytest -q -m "not slow"
 uv run python scripts/verify.py
 ```
 
-### Latest Runs (multiple invocations, including direct .venv/bin/python + timeout)
-- `uv sync --extra dev`: exit 0 (174 packages resolved).
-- `pytest -m "not slow"`: 15/15 pass.
-- Full `pytest`: 16/16 pass (15 non-slow + 1 slow agent test).
-- `scripts/verify.py` (uv run and direct `.venv/bin/python`): **✅ All verifications passed!**
-  - DB repositories (User + FK-safe inserts, Tx sums, Questionnaire).
-  - Auth + Recommender + Ethics (token, recs with sources + consent gating).
-  - GraphQL (TestClient override + DB-backed).
-  - MCP (list + call direct; full stdio_client spawn + call_tool).
-- Unauth GraphQL (TestClient): `200` + `errors` with `extensions: {"code": "UNAUTHENTICATED"}` (confirmed).
-- Auth GraphQL: data returned cleanly.
+### Latest Runs (2026-07-13)
+- `uv sync --extra dev`: exit 0.
+- `pytest -m "not slow"`: 15/15 pass (........................).
+- Full pytest: 16/16 pass.
+- `scripts/verify.py`: ✅ All verifications passed!
+  - DB (repos, tx + questionnaire + new EmployeeAssessment + CareerSignal).
+  - Auth + legacy recs + ethics.
+  - GraphQL (careerRecommendations + legacy spendSummary).
+  - MCP (list_tools, direct calls for budget/career/submit + full stdio spawn; submit→recommend flow exercised).
+- Career flow after submit_assessment demonstrably works (high/low consent degradation + sources).
 
-All recommended commands + critical paths (direct unauth/auth, MCP stdio) succeed consistently. No BrokenPipe on recent stdio runs.
+## Current State (Accomplished)
+- **Primary federal paths**:
+  - `EmployeeAssessment` model + repo (skills_inventory, performance_level, career_goals, critical_role_interest, consent_for_career_modeling, raw_answers).
+  - `CareerSignal` + synthetic career profiles in recommender.
+  - `submit_assessment` mutation (GraphQL) + MCP tool.
+  - `career_recommendations` query + MCP tool (fetches latest assessment for user when present; falls back to synthetic).
+  - Agent updated to pull assessment + call career recs + append career notes.
+  - Ethics/Principal/consent gating, source attribution, persist_decision, refusals all flow through.
+  - Seeding in `scripts/seed_demo_data.py` covers assessments/signals (additive).
+- GraphQL types: `AssessmentInput`, `CareerRecommendation` (legacy kept alongside).
+- Schema: new fields primary in comments + ordering where possible; legacy paths explicitly labeled "kept during pivot".
+- MCP server: 5 tools (3 legacy + get_career_recommendations + submit_assessment); `_principal_from_args` for context.
+- Tests: added submit + career consent tests in test_graphql.py + test_mcp.py.
+- Verify: demonstrates submit + after-recs flow + stdio.
+- Rebrand started: app_name, README title+intro+examples, config audience, explorer, keycloak realm, some doc intros, CONTRIBUTING header.
+- Threat model starter (STRIDE-AI + OWASP/ATLAS): 3 examples (assessment poisoning, prompt injection on agent, info disclosure of profiles).
+- Compliance starters: nist-ai-rmf-crosswalk.md skeleton (Govern/Map/Measure/Manage), il-deployment-guidance.md (IL4/5/6 notes).
+- DB: Alembic migrations present (initial + employee assessments/career).
+- Everything else from prior (flat limited GraphQL + guards, async SQLA + pooling, Principal threading to MCP, EthicalPolicy, offline local keys + demo tokens, rate limits, etc.) still solid.
 
-## What Works (Verified)
-- Dependency install, full test suite, one-shot verify script.
-- Async DB (SQLAlchemy 2.0 + explicit pooling, even SQLite; PRAGMA + rollback fixtures; create_all in init + lifespan).
-- Repositories (all 5 entities exercised; get_or_create before FK dependents fixes IntegrityError).
-- Auth: Principal model (consent_level, has_consent_for_social, scopes), demo tokens (RS256 local keys), get_current_principal (graceful None), client_credentials helper (mocked + real path), /demo-token.
-- GraphQL: flat schema (spendSummary, recommendations, askAgent, submitQuestionnaire), QueryDepthLimiter + custom cost guard, structured GraphQLError with extensions for auth, dependency overrides for tests.
-- Recommender: rules + synthetic interests + ethics + source attribution.
-- Ethics: policy checks (consent, transparency, refuse_unethical), decisions logged (in-mem for template).
-- Agent: stub simulation (pre-filter + recs + notes) passes slow test.
-- MCP: 3 safe tools, direct + full stdio end-to-end (verify spawns server).
-- App: lifespan (seed demo txs + user), rate limiting, CORS, explorer, health, debug endpoints.
-- Tests: repo tests (5), security/ethics (incl. client creds respx), graphql (auth/unauth, depth, consent, slow).
-- Config: 12-factor (pydantic-settings), .env.example, offline-first.
-- Other: flat schema deliberate limit, synthetic data only, ethics as cross-cut.
+## Legacy Paths (Intentional During Transition)
+- `spend_summary`, `recommendations`, `submit_questionnaire`, `get_spend_summary`, `get_budget_recommendations`, `ask_budget_agent`, old Questionnaire/Transaction models.
+- These remain functional for reference/compatibility. Marked "legacy" or "kept during pivot" in code and docs.
+- Goal for MVP: new federal paths are the documented primary; legacy do not block or confuse the main story.
 
-## What Doesn't Work / Gaps / Fragile Areas
-- **plan.md was absent** at start of re-assessment (now added by this document).
-- **MCP principal**: `app/services/mcp_server.py` hardcodes `DEMO_PRINCIPAL` (always demo-user-123, consent=2). Comment admits "in real deployments you would thread auth". Verify exercises only demo path. No real Principal support from MCP context.
-- Agent is simulation stub only (no live pydantic-ai / LiteLLM execution — intentional deferral).
-- `execute_sync(schema)` fails for async resolvers (use TestClient or `await schema.execute(...)`).
-- Console traceback sometimes leaks on GraphQLError raises (response itself is clean 200+ext).
-- `scripts/seed_demo_data.py`: still a TODO stub.
-- No Alembic migration files (relies on `create_all`; comment says "use Alembic in prod").
-- Ethics decisions: model + repo exist, but main paths (recommender, agent, GraphQL) use in-memory `_ETHICS_LOG` only. Not persisted.
-- JWKS real path: TODO stub (only local test keys fully work; partial fallback).
-- Test gaps: heavy reliance on dependency_overrides (fewer raw header token tests); no dedicated MCP principal variation tests; ethics log DB integration untested in main flows.
-- Minor: sys.path hacks in scripts; verify stdio spawn can be timing-sensitive (though currently stable); deprecation warning filter in pytest config for extensions; no coverage/mypy/ruff as part of "recommended" commands; slow test imports heavier libs.
-- Real Auth0/Keycloak requires .env + `USE_LOCAL_TEST_KEYS=false` + JWKS (not exercised in default runs).
-- No integrated MCP in FastAPI (by design: stdio standalone).
+## What Is the MVP? (Measurable)
+MVP is a credible, runnable **reference implementation** for an ethics-first federal workforce / talent / critical-role readiness predictor. It must be clone-and-run demonstrable and document the right patterns.
 
-## Critical Re-assessment
-The implementation is **more complete and verified** than prior conversation notes suggested. All user-looped commands (sync, non-slow pytest, verify.py) + direct unauth GraphQL checks are green. Phase 1 deliverables (repo tests + fixture fixes for engine/FK, security client_creds tests + helper, GraphQLError extensions on all protected fields, main.py updates, etc.) are present and passing.
+MVP success criteria:
+1. Primary end-to-end flow works and is the lead story: `submit_assessment` (GraphQL or MCP) → `career_recommendations` (uses real assessment data when submitted) with consent gating, `data_sources`, `ethics_note`.
+2. Guardrailed agent answers workforce-oriented questions (e.g. "skills needed for X mission").
+3. Consent levels visibly affect output (high = richer sources/recs; low = degraded or refused).
+4. All outputs declare sources + ethical decisions are auditable (persisted).
+5. Schema/docs/examples lead with federal paths; legacy clearly labeled.
+6. Rebrand complete for high-visibility surfaces (no "customer-spend-api" as primary name in README, pyproject description, top-level docs, scripts, explorer, getting-started, usage).
+7. Threat model expanded to 6–8 concrete examples with mitigations (STRIDE-AI / OWASP LLM+Agentic / ATLAS).
+8. Compliance docs have substance: FedRAMP SSP outline or mapping skeleton + expanded NIST AI RMF crosswalk + IL deployment notes.
+9. Verify + tests + one-command setup remain green and exercise the new primary paths first.
+10. README + getting-started + use-cases + architecture lead with submit + career recs + federal context.
+11. Full "git clone ... && uv sync && uv run python scripts/seed... && uv run python scripts/verify.py" succeeds cleanly for a new user.
 
-**Strengths**:
-- Matches original spec closely: ethics-first, limited/flat GraphQL + guards, MCP curated tools, pooling/async, mocks everywhere, production signals (rate limit, settings).
-- Verifiable by the exact commands the user requested.
-- Deliberate choices (flat schema, synthetic, offline keys, stub agent) respected.
+## MVP Gaps / Remaining Steps (Small Atomic Commits Only)
+Work in small, reviewable units. Prefer one file / one focused area per commit. Update plan + run verify before/after.
 
-**Weaknesses vs "production-grade template" goal**:
-- Documentation (plan.md missing until now; ADRs/ empty).
-- Wiring completeness (MCP auth, ethics persistence to DB, Alembic, real JWKS).
-- Polish (error logging cleanliness, broader test variety, script robustness).
-- Some core TODOs left (though non-blocking for demo use).
+### P1: Schema / Documentation Primacy (Make New Paths the Lead)
+- [ ] Update GraphQL schema.py: improve comments, ensure career_* and submit_assessment appear before or prominently vs legacy; minor docstrings.
+- [ ] Update app/api/graphql/types.py docstrings if needed.
+- [ ] Refresh docs/architecture.md flow diagram + text to lead with "submit assessment → career recs".
+- [ ] Update docs/use-cases.md: replace spend examples with federal employee lifecycle / critical role readiness; keep one "patterns lift" note.
+- [ ] Update docs/getting-started.md: change primary curl/GraphQL/MCP examples to careerRecommendations + submit_assessment (show high/low consent).
 
-**Trade-off decisions respected** (per history):
-- No Redis (user: "don't add redis").
-- Keep basic setup.
-- Agent stub for now.
-- Offline mocks + local keys primary.
-- Flat GraphQL (no deep nesting).
+### P2: Full Rebrand Sweep (Gradual, One Area at a Time)
+- [ ] pyproject.toml: name, authors, urls, description, entry points to "federal-workforce-predictor". (Note: uv.lock will be updated on next sync; commit both or let CI.)
+- [ ] CONTRIBUTING.md: fix clone URL + cd.
+- [ ] scripts/verify.py: header, final print, legacy tool calls ok but update narrative.
+- [ ] tests/conftest.py: module docstring.
+- [ ] All docs/ files still containing "customer-spend-api":
+  - docs/configuration.md (table + .env example)
+  - docs/usage/graphql.md
+  - docs/usage/mcp.md (update tool examples to prefer career)
+  - docs/concepts/*.md (synthetic-data, mcp-integration, principal-model, limited-graphql, ethics-and-consent)
+  - docs/deployment/*.md (docker, auth-providers)
+  - docs/productionizing.md
+  - docs/extending/*.md (review for examples)
+- [ ] app/main.py, app/services/*.py, app/services/mcp_server.py: update module docstrings / comments that still say "spend budget service".
+- [ ] docs/usage/scripts.md and any other missed references.
+- [ ] .env.example + docker-compose.yml + alembic comments (db file name `spend.db` may stay for minimal diff; add comment "legacy filename; swap via DATABASE_URL").
+- [ ] After sweep: global grep for remaining "customer-spend" and "spend-api" (except historical notes in __init__.py or plan).
+- [ ] Optional small: rename internal legacy functions only if low risk (prefer keep for now to minimize blast).
 
-### Example Trade-off Matrices (as originally requested)
-**Auth approach**:
-| Option | Pros | Cons | Chosen |
-|--------|------|------|--------|
-| Real JWKS + Auth0/Keycloak only | Production-accurate | No offline dev/CI | Hybrid (local RSA default + real path) |
-| Local test keys + mocks | Fast, no secrets, reproducible | Not identical to prod | Primary for template + tests |
-| Client credentials helper | Matches real flows | Requires IdP | Added (with respx mocks) |
+### P3: Threat Model + Compliance Expansion + Docs Refresh
+- [ ] Expand docs/threat-models/STRIDE-AI-initial.md: add 3–5 more examples (e.g. model extraction via rec queries, excessive agency on role allocation, data exfil via agent, supply-chain on LLM, consent bypass attempts, synthetic profile poisoning). Keep structured (Threat / Impact / Mitigations / Related / Status).
+- [ ] docs/compliance/nist-ai-rmf-crosswalk.md: fill out more rows with specific mappings from current code (EthicalPolicy → Govern/Manage, persist + sources → Map/Measure, etc.).
+- [ ] Add or expand FedRAMP-relevant section (either in nist or new file): high-level SSP outline (AC, AU, SC, CM controls relevant to AI), ATO notes, continuous monitoring via decision logs.
+- [ ] Flesh il-deployment-guidance.md with more concrete controls per IL (data handling, network, personnel, logging).
+- [ ] Update README quickstart + examples to use career first; mention legacy only briefly.
+- [ ] Refresh docs/concepts/ethics-and-consent.md and use-cases to use federal terminology.
+- [ ] Ensure explorer.html and main health/docs point clearly.
 
-**MCP auth**:
-| Option | Pros | Cons | Chosen |
-|--------|------|------|--------|
-| Hardcode DEMO_PRINCIPAL | Simple, verify easy | Not realistic | Temporary (now gap) |
-| Thread Principal from context / separate creds | Realistic for stdio clients | Complex (MCP stdio limited) | Target for Phase 2 |
-| Separate MCP auth layer | Clean separation | Extra surface | Deferred |
+### P4: Polish, Final Checks, MVP Closure
+- [ ] Review and update any remaining code comments (agent.py, recommender.py, mcp_server.py, main.py) for accuracy.
+- [ ] Add or update a "MVP Demo Flow" section in README or getting-started (submit then recommend).
+- [ ] Run full end-to-end clone simulation if possible (or document exact steps).
+- [ ] Ensure all tests still cover consent degradation for career paths.
+- [ ] Update this plan.md to mark sections complete + add "MVP achieved" date when criteria met.
+- [ ] (Optional but nice) One small commit for any polish on career rec logic / rationale quality in recommender if gaps found during docs work.
+- [ ] Final verification run + git status clean.
 
-**Agent**:
-| Option | Pros | Cons | Chosen |
-|--------|------|------|--------|
-| Full pydantic-ai + LiteLLM now | "Real" | Heavy deps, non-deterministic, cost | Stub + ethics guard (defer) |
-| Rules + recs simulation | Fast, deterministic, ethics demo | Not full LLM | Current |
-| Optional real behind flag | Flexible | Complexity | Future |
+## Immediate Next (After This Plan Update)
+Pick one small item and commit atomically:
+1. One rebrand file (e.g. pyproject.toml + verify header) OR
+2. Add 2 more threat examples to STRIDE-AI-initial.md OR
+3. Update getting-started.md primary examples to career paths.
 
-**DB / persistence**:
-| Option | Pros | Cons | Chosen |
-|--------|------|------|--------|
-| create_all + SQLite | Zero setup, template friendly | No migration history | Current + note Alembic |
-| Alembic from day 1 | Prod-ready | Slower start | Add in Phase 2 |
-| In-mem ethics log | Simple | No audit trail | In-mem now; wire repo soon |
+Always: edit → run verify + targeted pytest → structured commit message (see docs/development/commit-conventions.md).
 
-**GraphQL error model**:
-| Option | Pros | Cons | Chosen |
-|--------|------|------|--------|
-| HTTP 401 on unauth | REST-like | Violates GraphQL "always 200 + errors" | GraphQLError + extensions (200 + errors) |
-| Extensions for code | Structured, client-friendly | Slightly more verbose | Yes (UNAUTHENTICATED etc.) |
+## Definition of MVP "Done" (All Must Be True)
+- Verification commands (sync, pytest not-slow, verify.py) exit 0 and demonstrate new primary flows.
+- Primary demo path in README/getting-started/verify is submit_assessment → career_recommendations.
+- No primary branding still says "customer-spend-api" (historical mentions allowed in notes).
+- At least 6–8 documented threats with mitigations.
+- Compliance docs contain usable FedRAMP/NIST/IL substance (not just placeholders).
+- New federal use cases dominate docs/use-cases.md and architecture.
+- All GraphQL/MCP paths for career + submit exercised in tests + verify.
+- Ethics decisions, sources, consent gating, refusal behavior visible and correct.
+- Clean "clone, seed, verify" story for first-time users.
+- plan.md reflects reality and is updated.
 
-## Phases (Updated)
-**Phase 1 (Core foundations + tests + demo updates)** — Largely complete (repo tests, security helpers/tests, extensions, fixes, verify green).
-- DB + repos + fixtures (done).
-- Auth (demo + client creds) + Principal (done).
-- Flat GraphQL with guards + extensions (done).
-- Recommender + ethics policy (done).
-- Basic tests + verify script (done).
-- MCP skeleton + direct (done, but principal pending).
+## Open Items / Non-MVP (Future)
+- Full rebrand of internal function names (ask_budget_agent etc.) or deprecate legacy entirely.
+- Real LLM agent behind flag (Pydantic AI + LiteLLM exercised).
+- Postgres + full prod Alembic workflows.
+- Real IdP + JWKS in primary docs (beyond the existing helpers).
+- Bias testing harness, more metrics, FedRAMP SSP template (full doc).
+- IL5/IL6 hardened image examples.
+- Coverage, ruff, mypy in recommended commands.
+- Published package / Docker Hub image.
 
-**Phase 2 (MCP maturity + persistence + polish + docs)** — Started 2026-07-08.
-- [x] Replace DEMO_PRINCIPAL with real/configurable Principal support in mcp_server (via tool args user_id/consent_level). Updated list_tools schemas, call_tool, direct+stdio usage in verify.
-- [x] Added tests/test_mcp.py exercising multiple principals (consent levels, users) direct + stdio (slow).
-- [~] Persist ethics decisions via EthicsLogRepository (added persist_decision + await in GraphQL recs/MCP recs; agent attempts too).
-- [ ] Add Alembic initial migration + update init_db/docs.
-- [ ] Complete seed_demo_data.py.
-- [ ] Expand tests further (raw header auth, ethics DB queries, unauth extensions).
-- [ ] Clean GraphQLError tracebacks.
-- [x] plan.md updated with progress.
-- [ ] JWKS + other.
-- [ ] Verification enhancements.
+## Notes on Process
+- User constraints respected: adapt (no from-scratch), small atomic commits only, structured commit messages (Context/Why, Design decisions with paths, Tradeoffs, Changes, Verification, Refs).
+- Synthetic data + refusals for high-stakes/bias protected classes remain core.
+- Database filename `spend.db` left as-is for minimal migration churn (documented).
+- Verify.py is the source of truth for "it works".
 
-**Phase 3 (Productionization + real agent + examples)** (future).
-- Real Pydantic AI agent (optional, behind setting).
-- Swap to Postgres example + full Alembic.
-- Real IdP setup guide + secrets handling.
-- Observability (structlog enhancements, tracing), more rate limit / cost controls.
-- Example "how to productionize" doc.
-- Higher test coverage target + CI simulation.
-
-## Definition of "Done" (Measurable)
-A release / handoff is "done" when **all** of the following are true:
-1. Recommended commands run clean:
-   - `uv sync --extra dev` succeeds.
-   - `uv run pytest -m "not slow"` → 100% pass (currently 15 tests).
-   - `uv run python scripts/verify.py` → ✅ All verifications passed! (DB, auth/ethics/recomm, GraphQL, MCP stdio).
-2. Full test suite (incl. slow) is green (16/16).
-3. Unauth/auth GraphQL behavior confirmed (200 + extensions for errors; data for valid).
-4. No hardcoded DEMO_PRINCIPAL remains in mcp_server; real Principal support exercised.
-5. `plan.md` exists and is current (includes this re-assessment, matrices, verification reqs, done criteria, phases).
-6. Core TODOs/FIXMEs addressed or explicitly scoped (MCP auth, ethics persistence, Alembic, seed, JWKS).
-7. Ethics decisions persisted to DB in recommender/agent/GraphQL paths (repo used).
-8. README quickstarts (token, curl/GraphiQL, MCP, explorer) + /demo-token work end-to-end.
-9. Tests cover exercised paths (auth/unauth, ethics refusal, DB repos, MCP, recommender) with no critical holes.
-10. Template is usable as starting point (easy to extend schema, swap DB, add real auth, run verify).
-
-Bonus / stretch for high quality: ruff clean, basic coverage >80% on core modules, one ADR written.
-
-## Open Items / TODOs (tracked)
-- [x] MCP: real principal via args + client tests (Phase 2 started + implemented).
-- [~] Ethics persistence to DB (wired persist_decision + calls in GraphQL/MCP/agent; in-mem kept for tests; full test coverage pending).
-- [x] Alembic initial migration (autogenerated with full CREATEs) + completed seed_demo_data.py + updated init_db comment.
-- [ ] GraphQLError logging cleanliness.
-- [ ] Expanded tests + coverage.
-- [ ] JWKS path.
-- [x] plan.md (this file).
-- [x] Verify commands green (multiple runs, including after Phase 2 edits).
-
-## Notes
-- User preferences applied: basic setup, no Redis, defer some, "I'll defer to you based on best practices".
-- Synthetic social always mocked.
-- Designed for easy swap (SQLite → Postgres, local keys → JWKS, stub → real agent).
-- Next: After user confirmation, implement Phase 2 items starting with MCP principal + plan alignment.
-
-See README.md for quickstart. For detailed documentation see the `docs/` folder (getting-started, configuration, concepts, usage, deployment, extending, use-cases, ADRs, etc.).
-
-Run the verification commands frequently.
+See README.md for quickstart. Full docs in `docs/`. Run the verification commands frequently.
