@@ -1,9 +1,9 @@
 {
-  "realm": "customer-spend-api",
+  "realm": "federal-workforce-predictor",
   "enabled": true,
   "clients": [
     {
-      "clientId": "customer-spend-api",
+      "clientId": "federal-workforce-predictor",
       "enabled": true,
       "publicClient": false,
       "directAccessGrantsEnabled": false,
