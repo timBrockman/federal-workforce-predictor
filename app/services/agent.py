@@ -14,6 +14,8 @@ from typing import Any
 
 from app.core.ethics import EthicalDecision, EthicalPolicy, log_decision, persist_decision
 from app.core.security import Principal
+from app.db.engine import get_session_factory
+from app.db.repositories import EmployeeAssessmentRepository
 from app.services.recommender import get_recommendations, get_career_recommendations
 
 
@@ -45,8 +47,17 @@ async def ask_budget_agent(
     if not principal.has_consent_for_social():
         answer += " (Note: social signals were not used because consent was not granted.)"
 
+    # Fetch latest assessment so career recs use real DB data (mirrors GraphQL layer)
+    assessment = None
+    factory = get_session_factory()
+    async with factory() as session:
+        a_repo = EmployeeAssessmentRepository(session)
+        assess = await a_repo.get_latest_for_user(principal.user_id)
+        if assess:
+            assessment = {"skills_inventory": assess.skills_inventory}
+
     # Small federal pivot integration (career recs when relevant)
-    career_recs, _ = get_career_recommendations(principal, context)
+    career_recs, _ = get_career_recommendations(principal, assessment or context)
     if career_recs:
         answer += f" Career readiness notes: {career_recs}."
 
