@@ -1,7 +1,7 @@
 [project]
 name = "customer-spend-api"
 version = "0.1.0"
-description = "Reference implementation of an ethics-first customer spend intelligence microservice. FastAPI + Strawberry GraphQL (limited), MCP, Alembic, consent-aware auth, and guardrailed AI patterns."
+description = "Reference implementation of an ethics-first federal workforce / talent predictor microservice (employee lifecycle & critical role readiness). FastAPI + Strawberry GraphQL (limited), MCP, Alembic, consent-aware auth, guardrailed AI, STRIDE-AI, and FedRAMP/NIST guidance."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
