@@ -76,9 +76,81 @@ All mitigations leverage (and will extend) the existing ethics/Principal/audit/f
 
 **Status**: Partially mitigated via consent, transparency, and logging. Production systems would add stronger access controls and PII scrubbing.
 
+## Example Threat: Model Extraction / Reconnaissance via Career Recommendations (STRIDE Information Disclosure + ATLAS AML.T0051)
+
+**Threat**: Attacker with valid low-privilege access repeatedly queries career_recommendations or ask_agent with crafted inputs to infer model internals, synthetic profile distributions, or decision boundaries (e.g. "what exact skills trigger cyber role readiness?").
+
+**Impact**:
+- Model extraction enabling future evasion or targeted manipulation.
+- Leakage of synthetic profile logic (may reveal agency priorities).
+- Privacy leakage about aggregate signals.
+
+**Mitigations (current + planned)**:
+- Flat schema + QueryDepthLimiter + cost limits prevent broad exploration.
+- All outputs limited to high-level rationale + declared sources; no raw model scores or full profiles.
+- Rate limiting + EthicalPolicy pre-filters on sensitive keywords.
+- Future: add query logging + anomaly detection in EthicalDecisionLog; return less deterministic rationales in prod.
+
+**Related**: OWASP LLM06 Data Leakage, ATLAS Recon.
+
+**Status**: Partially mitigated. Limits + transparency help.
+
+## Example Threat: Excessive Agency on Role Allocation Recommendations (STRIDE Elevation of Privilege + OWASP Agentic Excessive Agency)
+
+**Threat**: The guardrailed agent or recommender is used (via prompt or chained tool) to suggest specific personnel assignments to critical roles without human oversight, leading to unsafe staffing decisions.
+
+**Impact**:
+- High-stakes misallocation.
+- Violation of policy / mission risk.
+- Audit / repudiation problems.
+
+**Mitigations (current + planned)**:
+- EthicalPolicy refuses high-stakes allocation language ("assign user X to role", "promote immediately").
+- Responses include ethics_note + sources; decision always persisted.
+- Agent is simulation (no autonomous action); docs emphasize "recommendation only, human-in-loop required".
+- Future: IL5/6 guidance requires explicit "advisory only" flag + approval workflow.
+
+**Related**: ATLAS AML.T0023 Excessive Agency.
+
+**Status**: Strongly mitigated for this reference; production must add human review gates.
+
+## Example Threat: Supply-Chain / LLM Provider Tampering (STRIDE Tampering + ATLAS AML.T0004)
+
+**Threat**: Compromised or malicious LLM backend (Ollama/model provider) returns biased or poisoned career advice despite local guardrails.
+
+**Impact**:
+- Integrity of outputs for workforce decisions.
+- Bypassing of local EthicalPolicy if agent trusts LLM too much.
+
+**Mitigations (current + planned)**:
+- Current agent is rules-based simulation (no live LLM call in default path) — deliberate for determinism.
+- LiteLLM/Ollama config documented; production must pin FedRAMP-authorized providers + output validation.
+- All responses still pass through EthicalPolicy + source attribution (even if LLM used).
+- Future: add output scanning + multiple model cross-check for high impact.
+
+**Related**: OWASP LLM02 Insecure Output Handling, supply chain in NIST Govern.
+
+**Status**: Mitigated in template by stub; real deployments need provider vetting.
+
+## Example Threat: Repudiation — Incomplete or Tampered Audit Logs (STRIDE Repudiation)
+
+**Threat**: Attacker or insider suppresses/modifies EthicalDecisionLog entries so that biased or refused career recommendations cannot be traced back to a principal or input assessment.
+
+**Impact**:
+- Loss of accountability for high-stakes AI decisions.
+- Compliance failure (FedRAMP AU controls).
+
+**Mitigations (current + planned)**:
+- persist_decision called on all main paths (GraphQL recs, MCP, agent).
+- Decisions include principal.user_id, allowed, reason, sources.
+- DB-backed (Alembic + repo) in production paths.
+- Future: immutable append-only logs, signing, or export to SIEM for IL5+.
+
+**Status**: Good foundation via ethics layer; production must harden logging.
+
 See also:
-- plan.md (Phase 2)
-- docs/compliance/ (forthcoming FedRAMP/NIST mappings)
+- plan.md (P3 threats target)
+- docs/compliance/ (FedRAMP/NIST mappings)
 - OWASP Top 10 for LLMs 2025 / Agentic 2026
 - MITRE ATLAS
 
