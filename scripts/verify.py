@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-One-shot verification script for the customer-spend-api template.
+One-shot verification script for the federal-workforce-predictor reference.
 
 Runs the key production paths:
-- DB init + repositories
-- Auth / token
-- Recommender + ethics
-- GraphQL (recommendations + spendSummary)
-- MCP tools (via direct call + full stdio client)
+- DB init + repositories (incl. EmployeeAssessment)
+- Auth / token + ethics
+- Recommender + career recs (and legacy)
+- GraphQL (careerRecommendations + submit + legacy)
+- MCP tools (via direct call + full stdio client; submit→recommend flow)
 
 Usage:
     uv run python scripts/verify.py
@@ -163,7 +163,7 @@ async def verify_mcp():
 
 
 async def main():
-    print("customer-spend-api verification\n" + "=" * 40)
+    print("federal-workforce-predictor verification\n" + "=" * 40)
     await verify_db()
     verify_auth_and_recommender()
     verify_graphql()
