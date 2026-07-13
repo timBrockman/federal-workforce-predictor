@@ -2,13 +2,13 @@
 
 ## Decision
 
-All "social" signals in customer-spend-api are **synthetic and versioned**. There is no support for ingesting real social media data.
+All signals (legacy social interests + new synthetic career profiles) in federal-workforce-predictor are **synthetic and versioned**. There is no support for ingesting real social or HR data.
 
-See `app/services/recommender.py`:
+See `app/services/recommender.py` (both legacy + career):
 ```python
-SYNTHETIC_PROFILES = {
-    "demo-user-123": ["coffee", "tech gadgets", "travel", "fitness"],
-    ...
+SYNTHETIC_PROFILES = { ... }
+SYNTHETIC_CAREER_PROFILES = {
+    "demo-user-123": {"skills": ["python", "cloud", ...], ...}
 }
 ```
 
@@ -29,15 +29,15 @@ By using synthetic data:
 ## How It Works
 
 1. `recommender.py` looks up interests by `user_id` from the synthetic map.
-2. If `principal.has_consent_for_social()` and `enable_synthetic_social` is true → include `"synthetic_social"` in sources.
+2. If consent granted (for career_modeling or social) + flag → include synthetic sources (e.g. "synthetic_career_signals").
 3. `EthicalPolicy.evaluate_recommendation` enforces the consent check.
 4. Recommendations and agent responses always declare the sources used.
 
 ## Consent Interaction
 
-- `consent_level >= 2` (or `require_consent_for_social=false`) allows synthetic social.
-- Lower consent → sources limited to `"questionnaire"`.
-- The recommender still returns useful (but more conservative) suggestions.
+- `consent_level >= 2` + explicit `consent_for_career_modeling` (or legacy social) allows synthetic signals.
+- Lower / no consent → degraded sources or refusal in high-stakes paths.
+- Career recs and agent always declare exact sources used.
 
 See [Ethics & Consent](ethics-and-consent.md) and [Principal Model](principal-model.md).
 
