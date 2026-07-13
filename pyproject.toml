@@ -1,13 +1,13 @@
 [project]
-name = "customer-spend-api"
+name = "federal-workforce-predictor"
 version = "0.1.0"
 description = "Reference implementation of an ethics-first federal workforce / talent predictor microservice (employee lifecycle & critical role readiness). FastAPI + Strawberry GraphQL (limited), MCP, Alembic, consent-aware auth, guardrailed AI, STRIDE-AI, and FedRAMP/NIST guidance."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-  { name = "The customer-spend-api contributors" }
+  { name = "The federal-workforce-predictor contributors" }
 ]
-urls = { "Homepage" = "https://github.com/timBrockman/customer-spend-api" }
+urls = { "Homepage" = "https://github.com/timBrockman/federal-workforce-predictor" }
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -49,7 +49,7 @@ dev = [
 ]
 
 [project.scripts]
-customer-spend = "app.main:main"
+federal-workforce-predictor = "app.main:main"
 
 [tool.ruff]
 line-length = 100
