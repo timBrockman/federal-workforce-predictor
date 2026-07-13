@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide gets you from zero to a working, authenticated call that demonstrates the key behaviors (consent, ethics, transparency).
+This guide gets you from zero to a working, authenticated call that demonstrates the key behaviors (consent, ethics, transparency) using the primary federal workforce paths (submit assessment → career recommendations).
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ uv --version
 
 ```bash
 git clone <your-fork-or-clone>
-cd customer-spend-api
+cd federal-workforce-predictor
 uv sync --extra dev
 ```
 
@@ -34,7 +34,7 @@ You should see green tests and `✅ All verifications passed!`.
 uv run python scripts/seed_demo_data.py
 ```
 
-This creates the `demo-user-123` with transactions, a questionnaire, and social consent.
+This creates the `demo-user-123` with an EmployeeAssessment (skills, goals, consent), synthetic career signals, plus legacy transactions/questionnaire for reference.
 
 ## 3. Local Development Server
 
@@ -57,7 +57,7 @@ uv run python scripts/get_demo_token.py --user demo-user-123 --consent 2
 
 Use the token in GraphiQL or curl.
 
-### High-consent vs low-consent example
+### High-consent vs low-consent example (primary federal path)
 
 High consent (`consent=2`):
 
@@ -65,7 +65,16 @@ High consent (`consent=2`):
 TOKEN=$(uv run python scripts/get_demo_token.py --consent 2)
 curl -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"query":"{ recommendations { category suggestedMonthlyBudget ethicsNote dataSources } }"}' \
+  -d '{"query":"{ careerRecommendations { recommendationType targetRole confidence rationale dataSources ethicsNote } }"}' \
+  http://localhost:8000/graphql
+```
+
+Submit an assessment (updates recommendations for the user):
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mutation { submitAssessment(input: {skillsInventory: \"python,cloud,cyber\", performanceLevel: \"high\", careerGoals: \"lead critical cyber mission\", consentForCareerModeling: true}) { success message } }"}' \
   http://localhost:8000/graphql
 ```
 
@@ -73,10 +82,10 @@ Low consent (`consent=0`):
 
 ```bash
 LOW_TOKEN=$(uv run python scripts/get_demo_token.py --user low-c --consent 0)
-# ... same curl with $LOW_TOKEN
+# ... same careerRecommendations query with $LOW_TOKEN (sources degraded or limited)
 ```
 
-You will see different `dataSources` and potentially degraded recommendations because of the ethics layer.
+You will see different `dataSources` and potentially degraded (or refused) career recommendations because of the ethics/consent layer. Legacy spend queries still work for reference.
 
 ## 5. MCP (Optional but very interesting)
 
@@ -88,11 +97,28 @@ uv run python -m app.services.mcp_server
 
 Use any MCP client (Claude Desktop, inspector, or a small Python script) and call tools while passing `user_id` and `consent_level`:
 
+Primary federal example:
+
 ```json
 {
-  "name": "get_budget_recommendations",
+  "name": "get_career_recommendations",
   "arguments": {
     "user_id": "demo-user-123",
+    "consent_level": 2
+  }
+}
+```
+
+Or submit first:
+
+```json
+{
+  "name": "submit_assessment",
+  "arguments": {
+    "skills_inventory": "python,cloud,cyber",
+    "performance_level": "high",
+    "career_goals": "lead critical cyber mission",
+    "consent_for_career_modeling": true,
     "consent_level": 2
   }
 }
