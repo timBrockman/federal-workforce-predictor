@@ -4,7 +4,7 @@
 
 GraphQL is powerful but can be dangerous if the schema allows arbitrary nesting or expensive queries. Clients (or malicious actors) can easily craft queries that cause deep recursion, N+1 problems, or massive data fetches.
 
-customer-spend-api deliberately uses a **flat schema** with strict guardrails.
+federal-workforce-predictor deliberately uses a **flat schema** with strict guardrails (career_recommendations, submit_assessment first).
 
 ## Design Decisions
 
