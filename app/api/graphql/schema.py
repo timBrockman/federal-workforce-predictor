@@ -12,6 +12,9 @@ from app.db.engine import get_session_factory
 from app.db.repositories import TransactionRepository
 from app.services.recommender import get_recommendations, get_career_recommendations
 
+from app.db.engine import get_session_factory
+from app.db.repositories import EmployeeAssessmentRepository
+
 from app.core.config import get_settings
 settings = get_settings()
 
@@ -126,7 +129,16 @@ class Query:
                 "Not authenticated", extensions={"code": "UNAUTHENTICATED"}
             )
 
-        recs, decision = get_career_recommendations(principal)
+        # Fetch latest assessment so recommender uses real submitted data (not only synthetic)
+        assessment = None
+        factory = get_session_factory()
+        async with factory() as session:
+            a_repo = EmployeeAssessmentRepository(session)
+            assess = await a_repo.get_latest_for_user(principal.user_id)
+            if assess:
+                assessment = {"skills_inventory": assess.skills_inventory}
+
+        recs, decision = get_career_recommendations(principal, assessment)
 
         await persist_decision(decision)
 
