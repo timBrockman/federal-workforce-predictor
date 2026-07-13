@@ -10,7 +10,7 @@
 ```env
 USE_LOCAL_TEST_KEYS=false
 AUTH_ISSUER=https://your-tenant.us.auth0.com/
-AUTH_AUDIENCE=https://api.customer-spend-api.example.com
+AUTH_AUDIENCE=https://api.federal-workforce-predictor.example.com
 AUTH0_CLIENT_ID=...
 AUTH0_CLIENT_SECRET=...
 AUTH0_TOKEN_URL=https://your-tenant.us.auth0.com/oauth/token
@@ -36,9 +36,9 @@ The realm import file lives at `docker/keycloak-realm.json` (minimal client crea
 Environment:
 
 ```env
-AUTH_ISSUER=http://localhost:8080/realms/customer-spend-api
-AUTH_AUDIENCE=customer-spend-api
-AUTH_JWKS_URL=http://localhost:8080/realms/customer-spend-api/protocol/openid-connect/certs
+AUTH_ISSUER=http://localhost:8080/realms/federal-workforce-predictor
+AUTH_AUDIENCE=federal-workforce-predictor
+AUTH_JWKS_URL=http://localhost:8080/realms/federal-workforce-predictor/protocol/openid-connect/certs
 ```
 
 For production Keycloak, use proper TLS and service account credentials.
