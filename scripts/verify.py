@@ -129,6 +129,18 @@ async def verify_mcp():
     res_career_low = await mcp_call_tool("get_career_recommendations", {"consent_level": 0})
     print(f"  get_career_recommendations (low consent): {len(res_career_low[0].text)} chars")
 
+    # Demonstrate full submit -> recommend flow (new domain)
+    res_submit = await mcp_call_tool("submit_assessment", {
+        "skills_inventory": "python,cloud,acquisition",
+        "performance_level": "high",
+        "career_goals": "lead critical cyber mission",
+        "consent_for_career_modeling": True,
+        "consent_level": 2
+    })
+    print(f"  submit_assessment: {len(res_submit[0].text)} chars")
+    res_after = await mcp_call_tool("get_career_recommendations", {"consent_level": 2})
+    print(f"  get_career_recommendations after submit: {len(res_after[0].text)} chars")
+
     # Full stdio client test (spawns the server) - pass explicit user context
     server_params = StdioServerParameters(
         command="uv", args=["run", "python", "-m", "app.services.mcp_server"]
