@@ -1,6 +1,6 @@
 # Use Cases & Why This Template Exists
 
-customer-spend-api is deliberately built as a **reference and teaching template**. Here are realistic scenarios where the patterns it demonstrates are valuable.
+federal-workforce-predictor is deliberately built as a **reference and teaching template**. Here are realistic scenarios where the patterns it demonstrates are valuable.
 
 ## 1. Internal Company Spend Coach
 
