@@ -28,6 +28,7 @@ from mcp.types import Tool, TextContent
 from app.core.ethics import persist_decision
 from app.core.security import Principal
 from app.db.engine import get_session_factory
+from app.db.repositories import EmployeeAssessmentRepository
 from app.db.repositories import TransactionRepository
 from app.services.agent import ask_budget_agent
 from app.services.recommender import get_recommendations, get_career_recommendations
@@ -157,7 +158,16 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
     elif name == "get_career_recommendations":
-        recs, decision = get_career_recommendations(principal)
+        # Fetch latest assessment so career recs use real DB data (consistent with GraphQL + agent)
+        assessment = None
+        factory = get_session_factory()
+        async with factory() as session:
+            a_repo = EmployeeAssessmentRepository(session)
+            assess = await a_repo.get_latest_for_user(principal.user_id)
+            if assess:
+                assessment = {"skills_inventory": assess.skills_inventory}
+
+        recs, decision = get_career_recommendations(principal, assessment)
         await persist_decision(decision)
         if not decision.allowed:
             result = {"error": decision.reason, "allowed": False, "user_id": principal.user_id}
