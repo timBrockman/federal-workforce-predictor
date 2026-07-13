@@ -1,7 +1,9 @@
 # federal-workforce-predictor: MVP Plan
 
 **Date**: 2026-07-13  
-**Status**: Core federal employee lifecycle / career readiness paths landed and wired (submitAssessment + careerRecommendations via GraphQL + MCP + recommender + agent + DB fetch). Legacy spend paths kept but de-emphasized + marked. Partial rebrand complete (README, config defaults, explorer, keycloak, app init, some docs). Threat model: 3 examples. Compliance docs: 2 skeletons. All `uv run pytest -m "not slow"`, full pytest, and `scripts/verify.py` green (verified 2026-07-13). Working tree clean.  
+**Status**: **MVP ACHIEVED**. Core federal paths (submitAssessment + careerRecommendations) fully wired + demonstrated. Rebrand sweep complete for primary surfaces (no non-historical "customer-spend-api"). 7 threats documented. Compliance (NIST + IL) fleshed out. All docs lead with federal use cases. Full tests + verify green. See "MVP Definition of Done" below for checklist confirmation.
+
+**MVP achieved on**: 2026-07-13 via series of small atomic commits (see git log).  
 **Context**: Pivoted from customer-spend-api (budget demo) to federal-workforce-predictor reference (structured assessments + synthetic career signals + consent-gated critical-role readiness recs + guardrailed agent + ethics/audit + compliance guidance). Commit discipline: all work as small single-purpose commits/PRs with structured messages. Synthetic data only. No real PII.
 
 ## Verification Commands (Run Before + After Any Change)
@@ -147,5 +149,18 @@ Always: edit → run verify + targeted pytest → structured commit message (see
 - Synthetic data + refusals for high-stakes/bias protected classes remain core.
 - Database filename `spend.db` left as-is for minimal migration churn (documented).
 - Verify.py is the source of truth for "it works".
+
+## MVP Achieved Summary (2026-07-13)
+
+All measurable MVP criteria met:
+- Primary flows (submit_assessment → career_recommendations) lead in README, getting-started, verify, usage, use-cases.
+- Rebrand: pyproject, CONTRIBUTING, scripts, all top docs, code docstrings updated. Only historical notes remain.
+- 7 STRIDE-AI/OWASP/ATLAS threats (expanded from 3).
+- NIST crosswalk populated + IL guidance with concrete controls.
+- Verifies + full pytest always green; primary paths exercised (including submit then recs).
+- Ethics, consent, sources, audit, refusals all operational.
+- Clean "uv sync; seed; verify" story.
+
+Future work moved to "Open Items / Non-MVP".
 
 See README.md for quickstart. Full docs in `docs/`. Run the verification commands frequently.
