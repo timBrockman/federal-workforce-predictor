@@ -2,23 +2,24 @@
 
 federal-workforce-predictor is deliberately built as a **reference and teaching template**. Here are realistic scenarios where the patterns it demonstrates are valuable.
 
-## 1. Internal Company Spend Coach
+## 1. Federal Workforce / Critical Role Readiness Predictor
 
-A finance team wants to give employees a private tool that suggests budget adjustments based on their own spending questionnaire plus (optionally) some team-level signals.
+A mission owner or HR analytics team in a federal agency wants to assess employee skills, performance signals, and career goals (with explicit consent) to identify readiness for critical roles, skill gaps, or recommended development actions.
 
 **Template value**:
-- Strong consent model prevents using social signals without explicit user opt-in.
-- Every recommendation explains exactly which data sources were used.
-- The MCP interface lets an internal AI assistant (Claude, Cursor, custom agent) call the same safe tools.
+- Consent_for_career_modeling flag + Principal levels gate use of synthetic signals; low consent degrades or refuses.
+- Every career recommendation declares exact `data_sources` (assessment vs synthetic career signals) + `ethics_note`.
+- Guardrailed agent supports queries like "skills needed for X mission" with the same ethics layer.
+- MCP lets secure internal agents/tools call submit_assessment + career recs safely.
 
-## 2. Personal Finance AI Prototype / Demo
+## 2. Talent & Employee Lifecycle Prototype (Agency Internal)
 
-You want to quickly stand up a credible demo that shows "AI that respects privacy and can say no".
+You want a fast, credible offline demo showing ethics-first AI for workforce planning that can say "no" on protected classes, high-stakes bias, or insufficient consent.
 
 **Template value**:
 - Works completely offline with local keys + Ollama.
-- Demonstrates refusal behavior live (try unethical requests).
-- The verify script gives you an instant "it actually works" story for stakeholders.
+- Demonstrates refusal + source transparency live.
+- The verify script + seeded assessments give instant working federal flow for stakeholders.
 
 ## 3. Reference Implementation for "Ethics as Code"
 
@@ -55,4 +56,4 @@ You want a small but realistic codebase to teach:
 
 Pick the scenario closest to your need, then follow the corresponding "Extending" recipe or "Production" guide.
 
-The goal is not that you ship customer-spend-api as-is, but that you can confidently lift the patterns (especially the ethics + principal + transparency ones) into your real services.
+The goal is not that you ship federal-workforce-predictor as-is, but that you can confidently lift the patterns (especially the ethics + Principal + transparency + limited interfaces + audit logging) into your real federal or high-stakes services.
