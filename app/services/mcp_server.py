@@ -28,8 +28,11 @@ from mcp.types import Tool, TextContent
 from app.core.ethics import persist_decision
 from app.core.security import Principal
 from app.db.engine import get_session_factory
-from app.db.repositories import EmployeeAssessmentRepository
-from app.db.repositories import TransactionRepository
+from app.db.repositories import (
+    ConsentRepository,
+    EmployeeAssessmentRepository,
+    TransactionRepository,
+)
 from app.services.agent import ask_budget_agent
 from app.services.recommender import get_recommendations, get_career_recommendations
 
@@ -103,6 +106,23 @@ async def list_tools() -> list[Tool]:
                     "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
                     "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
                 },
+            },
+        ),
+        Tool(
+            name="submit_assessment",
+            description="Submit workforce assessment (skills, performance, career goals, consent flags). Supports optional user context.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "skills_inventory": {"type": "string", "description": "Comma-separated list of skills (e.g. python,cloud,leadership)"},
+                    "performance_level": {"type": "string", "description": "high, medium, or low"},
+                    "career_goals": {"type": "string", "description": "Free-text career goals"},
+                    "critical_role_interest": {"type": "boolean", "description": "Interested in critical roles", "default": False},
+                    "consent_for_career_modeling": {"type": "boolean", "description": "Consent to use data for career modeling", "default": False},
+                    "user_id": {"type": "string", "description": "Target user ID (defaults to demo-user-123)"},
+                    "consent_level": {"type": "integer", "description": "Consent level 0-2 (defaults to 2)"},
+                },
+                "required": ["skills_inventory", "performance_level", "career_goals"],
             },
         ),
     ]
@@ -179,6 +199,42 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
                 "user_id": principal.user_id,
                 "consent_level": principal.consent_level,
             }
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+    elif name == "submit_assessment":
+        skills_inventory = arguments.get("skills_inventory", "")
+        performance_level = arguments.get("performance_level", "")
+        career_goals = arguments.get("career_goals", "")
+        critical_role_interest = arguments.get("critical_role_interest", False)
+        consent_for_career_modeling = arguments.get("consent_for_career_modeling", False)
+
+        factory = get_session_factory()
+        async with factory() as session:
+            a_repo = EmployeeAssessmentRepository(session)
+            await a_repo.create(
+                user_id=principal.user_id,
+                skills_inventory=skills_inventory,
+                performance_level=performance_level,
+                career_goals=career_goals,
+                critical_role_interest=critical_role_interest,
+                consent_for_career_modeling=consent_for_career_modeling,
+                raw_answers={"skills_inventory": skills_inventory, "career_goals": career_goals},
+            )
+
+            if consent_for_career_modeling:
+                c_repo = ConsentRepository(session)
+                await c_repo.record_consent(
+                    user_id=principal.user_id,
+                    purpose="career_modeling",
+                    granted=True,
+                    level=2,
+                )
+
+        result = {
+            "success": True,
+            "message": f"Assessment recorded. Career consent: {consent_for_career_modeling}",
+            "user_id": principal.user_id,
+        }
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
     else:
