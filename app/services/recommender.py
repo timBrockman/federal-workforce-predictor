@@ -93,9 +93,17 @@ def get_career_recommendations(
 ) -> tuple[list[dict[str, Any]], EthicalDecision]:
     """Workforce readiness / career trajectory recommender (federal pivot).
 
-    Uses assessment + synthetic career signals. All paths through EthicalPolicy.
+    Uses assessment (from DB or input) + synthetic career signals when consented.
+    All paths through EthicalPolicy.
     """
     profile = _get_synthetic_career_profile(principal.user_id)
+    # Prefer real assessment data when provided (e.g. from DB via GraphQL or agent context)
+    if assessment:
+        skills_str = assessment.get("skills_inventory") or assessment.get("skills", "")
+        if skills_str:
+            profile = dict(profile)  # shallow copy to avoid mutating the module constant
+            profile["skills"] = [s.strip() for s in str(skills_str).split(",") if s.strip()]
+
     sources = ["assessment"]
     if principal.has_consent_for_social():
         sources.append("synthetic_career_signals")
