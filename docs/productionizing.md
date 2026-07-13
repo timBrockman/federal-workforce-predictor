@@ -1,6 +1,6 @@
 # Productionizing Checklist
 
-This document collects practical steps to take customer-spend-api from template to production service.
+This document collects practical steps to take federal-workforce-predictor from template to production service (federal or otherwise).
 
 ## 1. Database
 
