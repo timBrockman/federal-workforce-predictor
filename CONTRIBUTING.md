@@ -1,4 +1,4 @@
-# Contributing to customer-spend-api
+# Contributing to federal-workforce-predictor
 
 Thank you for your interest in contributing!
 
